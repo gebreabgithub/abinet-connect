@@ -1,0 +1,900 @@
+{
+  "meta": {
+    "product": "Abinet Connect",
+    "version": "1.0",
+    "market": "Ethiopia",
+    "currency": "ETB",
+    "timezone": "Africa/Addis_Ababa"
+  },
+  "users": [
+    {
+      "id": "user-employer-1",
+      "name": "Abebe Family",
+      "phone": "+251911000101",
+      "role": "Employer",
+      "address": "Bole, Addis Ababa",
+      "city": "Addis Ababa",
+      "country": "Ethiopia",
+      "language": "Amharic / English",
+      "status": "Active",
+      "createdAt": 1780000000000
+    },
+    {
+      "id": "user-employer-2",
+      "name": "Lucy Restaurant Group",
+      "phone": "+251911000102",
+      "role": "Employer",
+      "address": "Kazanchis, Addis Ababa",
+      "city": "Addis Ababa",
+      "country": "Ethiopia",
+      "language": "Amharic / English",
+      "status": "Active",
+      "createdAt": 1780000001000
+    },
+    {
+      "id": "user-broker-1",
+      "name": "Selam Workforce Agency",
+      "phone": "+251911000202",
+      "role": "Broker",
+      "address": "Piassa, Addis Ababa",
+      "city": "Addis Ababa",
+      "country": "Ethiopia",
+      "language": "Amharic / English",
+      "status": "Active",
+      "createdAt": 1780000002000
+    },
+    {
+      "id": "user-worker-rodas",
+      "name": "rodas abeba",
+      "phone": "0934663455",
+      "role": "Worker",
+      "address": "Addis Abeba",
+      "city": "Addis Ababa",
+      "country": "Ethiopia",
+      "language": "Amharic",
+      "status": "Active",
+      "createdAt": 1780000003000
+    },
+    {
+      "id": "user-bac656b0ec",
+      "name": "leul",
+      "phone": "0947657435",
+      "role": "Worker",
+      "address": "addis abeba",
+      "city": "Addis Ababa",
+      "country": "Ethiopia",
+      "language": "Amharic / English",
+      "status": "Active",
+      "createdAt": 1779891094120
+    },
+    {
+      "id": "user-e2e48a2c8c",
+      "name": "leul",
+      "phone": "0947657430",
+      "role": "Worker",
+      "address": "addis abeba",
+      "city": "Addis Ababa",
+      "country": "Ethiopia",
+      "language": "Amharic / English",
+      "status": "Active",
+      "createdAt": 1779891108528
+    },
+    {
+      "id": "user-33b389841e",
+      "name": "Gebreab Gebremichael",
+      "phone": "+972552674059",
+      "role": "Worker",
+      "address": "RAMAT GEN",
+      "city": "Addis Ababa",
+      "country": "Ethiopia",
+      "language": "Amharic / English",
+      "status": "Active",
+      "createdAt": 1779891576965
+    },
+    {
+      "id": "user-7c83c3a8f6",
+      "name": "Abinet Admin",
+      "phone": "+251900000777",
+      "username": "admin",
+      "passwordHash": "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
+      "role": "MasterAdmin",
+      "address": "Addis Ababa",
+      "city": "Addis Ababa",
+      "country": "Ethiopia",
+      "language": "Amharic / English",
+      "status": "Active",
+      "createdAt": 1779892812372
+    },
+    {
+      "id": "user-d0b7dab383",
+      "name": "Gebreab Gebremichael",
+      "phone": "+972552674059",
+      "role": "Manager",
+      "address": "RAMAT GEN",
+      "city": "Addis Ababa",
+      "country": "Ethiopia",
+      "language": "Amharic / English",
+      "status": "Active",
+      "createdAt": 1779892921014
+    },
+    {
+      "id": "user-677d9c5c7b",
+      "name": "bil",
+      "phone": "0937346573",
+      "role": "Manager",
+      "address": "mekelle",
+      "city": "Addis Ababa",
+      "country": "Ethiopia",
+      "language": "Amharic / English",
+      "status": "Active",
+      "createdAt": 1779892967384
+    },
+    {
+      "id": "user-676a886f39",
+      "name": "Amit Gebremichael",
+      "phone": "0963275434",
+      "username": "amitgebremichael57@gmail.com",
+      "passwordHash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+      "role": "Worker",
+      "nationalId": "",
+      "nationalIdStatus": "Not provided",
+      "address": "MEKELLE",
+      "city": "Addis Ababa",
+      "country": "Ethiopia",
+      "language": "Amharic / English",
+      "status": "Active",
+      "createdAt": 1779967705943,
+      "availability": "now",
+      "skills": [
+        "cleaning",
+        "cooking"
+      ]
+    }
+  ],
+  "workers": [
+    {
+      "id": "worker-1",
+      "name": "Mekdes T.",
+      "phone": "+251911000301",
+      "role": "Worker",
+      "location": "Bole, Addis Ababa",
+      "skills": [
+        "Cooking",
+        "Cleaning",
+        "Child care"
+      ],
+      "experience": "5 years",
+      "salaryExpectation": "8,000 ETB/month",
+      "availability": "Available now",
+      "rating": 4.8,
+      "verified": true,
+      "verificationStatus": "Verified",
+      "riskLevel": "Normal",
+      "emergencyContact": "+251911000302",
+      "completedJobs": 42,
+      "createdAt": 1780000100000
+    },
+    {
+      "id": "worker-2",
+      "name": "Dawit K.",
+      "phone": "+251911000401",
+      "role": "Worker",
+      "location": "Kazanchis, Addis Ababa",
+      "skills": [
+        "Driving",
+        "Delivery",
+        "Office errands"
+      ],
+      "experience": "3 years",
+      "salaryExpectation": "650 ETB/day",
+      "availability": "Weekdays",
+      "rating": 4.6,
+      "verified": true,
+      "verificationStatus": "Verified",
+      "riskLevel": "Normal",
+      "emergencyContact": "+251911000402",
+      "completedJobs": 27,
+      "createdAt": 1780000101000
+    },
+    {
+      "id": "worker-3",
+      "name": "Aster B.",
+      "phone": "+251911000501",
+      "role": "Worker",
+      "location": "CMC, Addis Ababa",
+      "skills": [
+        "Elder care",
+        "Cleaning",
+        "Laundry"
+      ],
+      "experience": "7 years",
+      "salaryExpectation": "9,500 ETB/month",
+      "availability": "From next week",
+      "rating": 4.9,
+      "verified": true,
+      "verificationStatus": "Verified",
+      "riskLevel": "Normal",
+      "emergencyContact": "+251911000502",
+      "completedJobs": 51,
+      "createdAt": 1780000102000
+    },
+    {
+      "id": "user-worker-rodas",
+      "name": "rodas abeba",
+      "phone": "0934663455",
+      "role": "Worker",
+      "location": "Addis Abeba",
+      "skills": [
+        "cleaning"
+      ],
+      "experience": "New profile",
+      "salaryExpectation": "Negotiable",
+      "availability": "now",
+      "rating": 0,
+      "verified": true,
+      "verificationStatus": "Verified",
+      "riskLevel": "Normal",
+      "emergencyContact": "",
+      "completedJobs": 0,
+      "createdAt": 1780000103000
+    },
+    {
+      "id": "user-bac656b0ec",
+      "name": "leul",
+      "phone": "0947657435",
+      "role": "Worker",
+      "location": "addis abeba",
+      "skills": [
+        "driver"
+      ],
+      "experience": "New profile",
+      "salaryExpectation": "Negotiable",
+      "availability": "now",
+      "rating": 0,
+      "verified": true,
+      "verificationStatus": "Verified",
+      "riskLevel": "Normal",
+      "emergencyContact": "",
+      "completedJobs": 0,
+      "createdAt": 1779891094120
+    },
+    {
+      "id": "user-e2e48a2c8c",
+      "name": "leul",
+      "phone": "0947657430",
+      "role": "Worker",
+      "location": "addis abeba",
+      "skills": [
+        "driver"
+      ],
+      "experience": "New profile",
+      "salaryExpectation": "Negotiable",
+      "availability": "now",
+      "rating": 0,
+      "verified": true,
+      "verificationStatus": "Verified",
+      "riskLevel": "Normal",
+      "emergencyContact": "",
+      "completedJobs": 0,
+      "createdAt": 1779891108528
+    },
+    {
+      "id": "user-33b389841e",
+      "name": "Gebreab Gebremichael",
+      "phone": "+972552674059",
+      "role": "Worker",
+      "location": "RAMAT GEN",
+      "skills": [
+        "cleaning"
+      ],
+      "experience": "New profile",
+      "salaryExpectation": "Negotiable",
+      "availability": "yes",
+      "rating": 0,
+      "verified": true,
+      "verificationStatus": "Verified",
+      "riskLevel": "Normal",
+      "emergencyContact": "",
+      "completedJobs": 0,
+      "createdAt": 1779891576965
+    },
+    {
+      "id": "user-676a886f39",
+      "name": "Amit Gebremichael",
+      "phone": "0963275434",
+      "role": "Worker",
+      "location": "MEKELLE",
+      "skills": [
+        "cleaning",
+        "cooking"
+      ],
+      "experience": "New profile",
+      "salaryExpectation": "Negotiable",
+      "availability": "now",
+      "rating": 0,
+      "verified": true,
+      "verificationStatus": "Verified",
+      "nationalId": "",
+      "nationalIdStatus": "Optional",
+      "riskLevel": "Normal",
+      "emergencyContact": "",
+      "completedJobs": 0,
+      "createdAt": 1779967705943
+    }
+  ],
+  "brokers": [
+    {
+      "id": "broker-1",
+      "name": "Selam Workforce Agency",
+      "coverage": "Addis Ababa",
+      "managedWorkers": 128,
+      "monthlyPlacements": 31,
+      "commissionRate": "12%"
+    },
+    {
+      "id": "broker-2",
+      "name": "Habesha Talent Desk",
+      "coverage": "Addis Ababa and Adama",
+      "managedWorkers": 74,
+      "monthlyPlacements": 18,
+      "commissionRate": "10%"
+    }
+  ],
+  "jobCategories": [
+    {
+      "id": "cat-home",
+      "name": "Home Services",
+      "description": "Cleaning, cooking, childcare, elder care, and household support",
+      "createdAt": 1780000150000
+    },
+    {
+      "id": "cat-delivery",
+      "name": "Delivery and Driving",
+      "description": "Drivers, couriers, errands, and restaurant delivery",
+      "createdAt": 1780000151000
+    },
+    {
+      "id": "cat-office",
+      "name": "Office and Facility",
+      "description": "Office cleaning, maintenance, front desk, and facility support",
+      "createdAt": 1780000152000
+    },
+    {
+      "id": "cat-341db18f84",
+      "name": "Healthcare",
+      "description": "Care, clinic, and health support jobs",
+      "createdAt": 1779964598961
+    }
+  ],
+  "jobs": [
+    {
+      "id": "job-f28b5659d1",
+      "title": "barrom",
+      "employer": "barrom",
+      "location": "mekelle",
+      "skills": [
+        "cleaning"
+      ],
+      "salary": "25000",
+      "schedule": "Flexible",
+      "status": "Open",
+      "priority": "Standard",
+      "createdAt": 1779891561395,
+      "category": "Home Services"
+    },
+    {
+      "id": "job-2ef3534a85",
+      "title": "barrom",
+      "employer": "barrom",
+      "location": "mekelle",
+      "skills": [
+        "cleaning"
+      ],
+      "salary": "25000",
+      "schedule": "Flexible",
+      "status": "Open",
+      "priority": "Standard",
+      "createdAt": 1779891560504,
+      "category": "Home Services"
+    },
+    {
+      "id": "job-0bfe6ff2b2",
+      "title": "barrom",
+      "employer": "barrom",
+      "location": "mekelle",
+      "skills": [
+        "cleaning"
+      ],
+      "salary": "25000",
+      "schedule": "Flexible",
+      "status": "Open",
+      "priority": "Standard",
+      "createdAt": 1779891560256,
+      "category": "Home Services"
+    },
+    {
+      "id": "job-6a07d110a9",
+      "title": "barrom",
+      "employer": "barrom",
+      "location": "mekelle",
+      "skills": [
+        "cleaning"
+      ],
+      "salary": "25000",
+      "schedule": "Flexible",
+      "status": "Open",
+      "priority": "Standard",
+      "createdAt": 1779891560031,
+      "category": "Home Services"
+    },
+    {
+      "id": "job-149e9dcf11",
+      "title": "barrom",
+      "employer": "barrom",
+      "location": "mekelle",
+      "skills": [
+        "cleaning"
+      ],
+      "salary": "25000",
+      "schedule": "Flexible",
+      "status": "Open",
+      "priority": "Standard",
+      "createdAt": 1779891559814,
+      "category": "Home Services"
+    },
+    {
+      "id": "job-464459e34a",
+      "title": "barrom",
+      "employer": "barrom",
+      "location": "mekelle",
+      "skills": [
+        "cleaning"
+      ],
+      "salary": "25000",
+      "schedule": "Flexible",
+      "status": "Open",
+      "priority": "Standard",
+      "createdAt": 1779891559547,
+      "category": "Home Services"
+    },
+    {
+      "id": "job-45367c9146",
+      "title": "barrom",
+      "employer": "barrom",
+      "location": "mekelle",
+      "skills": [
+        "cleaning"
+      ],
+      "salary": "25000",
+      "schedule": "Flexible",
+      "status": "Open",
+      "priority": "Standard",
+      "createdAt": 1779891557747,
+      "category": "Home Services"
+    },
+    {
+      "id": "job-54028f0515",
+      "title": "worker",
+      "employer": "nom",
+      "location": "addis",
+      "skills": [
+        "cooking"
+      ],
+      "salary": "20000",
+      "schedule": "Flexible",
+      "status": "Open",
+      "priority": "Standard",
+      "createdAt": 1779891228706,
+      "category": "Home Services"
+    },
+    {
+      "id": "job-41e4dd60a4",
+      "title": "worker",
+      "employer": "nom",
+      "location": "addis",
+      "skills": [
+        "cooking"
+      ],
+      "salary": "20000",
+      "schedule": "Flexible",
+      "status": "Open",
+      "priority": "Standard",
+      "createdAt": 1779891225114,
+      "category": "Home Services"
+    },
+    {
+      "id": "job-81541c3398",
+      "title": "worker",
+      "employer": "nom",
+      "location": "addis",
+      "skills": [
+        "cooking"
+      ],
+      "salary": "20000",
+      "schedule": "Flexible",
+      "status": "Open",
+      "priority": "Standard",
+      "createdAt": 1779891224890,
+      "category": "Home Services"
+    },
+    {
+      "id": "job-5e1a88e093",
+      "title": "worker",
+      "employer": "nom",
+      "location": "addis",
+      "skills": [
+        "cooking"
+      ],
+      "salary": "20000",
+      "schedule": "Flexible",
+      "status": "Open",
+      "priority": "Standard",
+      "createdAt": 1779891224455,
+      "category": "Home Services"
+    },
+    {
+      "id": "job-a97ac56a59",
+      "title": "worker",
+      "employer": "nom",
+      "location": "addis",
+      "skills": [
+        "cooking"
+      ],
+      "salary": "20000",
+      "schedule": "Flexible",
+      "status": "Open",
+      "priority": "Standard",
+      "createdAt": 1779891218884,
+      "category": "Home Services"
+    },
+    {
+      "id": "job-1",
+      "title": "Live-out house worker",
+      "employer": "Abebe Family",
+      "location": "Bole, Addis Ababa",
+      "skills": [
+        "Cleaning",
+        "Cooking"
+      ],
+      "salary": "8,500 ETB/month",
+      "schedule": "Monday to Saturday",
+      "status": "Open",
+      "priority": "High",
+      "createdAt": 1780000200000,
+      "category": "Home Services"
+    },
+    {
+      "id": "job-2",
+      "title": "Restaurant delivery worker",
+      "employer": "Lucy Restaurant Group",
+      "location": "Kazanchis, Addis Ababa",
+      "skills": [
+        "Delivery",
+        "Motorbike"
+      ],
+      "salary": "700 ETB/day",
+      "schedule": "Evening shift",
+      "status": "Open",
+      "priority": "Standard",
+      "createdAt": 1780000201000,
+      "category": "Delivery and Driving"
+    },
+    {
+      "id": "job-3",
+      "title": "Office cleaner",
+      "employer": "Abyssinia Legal Office",
+      "location": "Mexico, Addis Ababa",
+      "skills": [
+        "Cleaning",
+        "Office maintenance"
+      ],
+      "salary": "6,200 ETB/month",
+      "schedule": "Morning shift",
+      "status": "Matched",
+      "priority": "Standard",
+      "createdAt": 1780000202000,
+      "category": "Office and Facility"
+    }
+  ],
+  "placements": [
+    {
+      "id": "placement-1",
+      "worker": "Mekdes T.",
+      "employer": "Abebe Family",
+      "broker": "Selam Workforce Agency",
+      "commission": "1,500 ETB",
+      "status": "Trial week",
+      "startDate": "2026-06-01",
+      "createdAt": 1780000300000
+    },
+    {
+      "id": "placement-2",
+      "worker": "Dawit K.",
+      "employer": "Lucy Restaurant Group",
+      "broker": "Habesha Talent Desk",
+      "commission": "900 ETB",
+      "status": "Scheduled",
+      "startDate": "2026-06-03",
+      "createdAt": 1780000301000
+    }
+  ],
+  "fraudAlerts": [
+    {
+      "id": "alert-1",
+      "type": "Duplicate phone attempt",
+      "status": "Reviewing",
+      "severity": "Medium"
+    }
+  ],
+  "supportTickets": [
+    {
+      "id": "ticket-1",
+      "requester": "Aster B.",
+      "topic": "National ID verification",
+      "priority": "High",
+      "status": "Open",
+      "createdAt": 1780000400000
+    },
+    {
+      "id": "ticket-2",
+      "requester": "Lucy Restaurant Group",
+      "topic": "Schedule update",
+      "priority": "Medium",
+      "status": "Pending",
+      "createdAt": 1780000401000
+    }
+  ],
+  "auditLog": [
+    {
+      "id": "audit-32437f6e13",
+      "at": 1779968808528,
+      "actor": "Account",
+      "action": "updated profile",
+      "subject": "Amit Gebremichael"
+    },
+    {
+      "id": "audit-3d99768e4d",
+      "at": 1779968808524,
+      "actor": "Worker Portal",
+      "action": "submitted application",
+      "subject": "Amit Gebremichael -> barrom"
+    },
+    {
+      "id": "audit-01c8a9f09f",
+      "at": 1779967727787,
+      "actor": "Staff",
+      "action": "updated verification",
+      "subject": "Amit Gebremichael"
+    },
+    {
+      "id": "audit-2e8c2d798a",
+      "at": 1779967705943,
+      "actor": "System",
+      "action": "registered user",
+      "subject": "Amit Gebremichael (Worker)"
+    },
+    {
+      "id": "audit-7fb4ab2ecd",
+      "at": 1779966901842,
+      "actor": "Staff",
+      "action": "updated verification",
+      "subject": "leul"
+    },
+    {
+      "id": "audit-d864cbe4e1",
+      "at": 1779966900898,
+      "actor": "Staff",
+      "action": "updated verification",
+      "subject": "Gebreab Gebremichael"
+    },
+    {
+      "id": "audit-5c9de20859",
+      "at": 1779966899832,
+      "actor": "Staff",
+      "action": "updated verification",
+      "subject": "rodas abeba"
+    },
+    {
+      "id": "audit-9cb89572b9",
+      "at": 1779966898750,
+      "actor": "Staff",
+      "action": "updated verification",
+      "subject": "leul"
+    },
+    {
+      "id": "audit-084f2b7999",
+      "at": 1779966897641,
+      "actor": "Staff",
+      "action": "updated verification",
+      "subject": "Aster B."
+    },
+    {
+      "id": "audit-2c9340ffdc",
+      "at": 1779964598961,
+      "actor": "Staff",
+      "action": "created job category",
+      "subject": "Healthcare"
+    },
+    {
+      "id": "audit-3950370ea3",
+      "at": 1779892967384,
+      "actor": "System",
+      "action": "registered user",
+      "subject": "bil (Admin)"
+    },
+    {
+      "id": "audit-a960c707b7",
+      "at": 1779892921014,
+      "actor": "System",
+      "action": "registered user",
+      "subject": "Gebreab Gebremichael (Admin)"
+    },
+    {
+      "id": "audit-b8803c5faf",
+      "at": 1779892812372,
+      "actor": "System",
+      "action": "registered user",
+      "subject": "Abinet Admin (Admin)"
+    },
+    {
+      "id": "audit-1d9b39bf08",
+      "at": 1779891576965,
+      "actor": "System",
+      "action": "registered user",
+      "subject": "Gebreab Gebremichael (Worker)"
+    },
+    {
+      "id": "audit-f8f0fc7691",
+      "at": 1779891561395,
+      "actor": "Employer Desk",
+      "action": "posted job",
+      "subject": "barrom"
+    },
+    {
+      "id": "audit-d54a3564cd",
+      "at": 1779891560504,
+      "actor": "Employer Desk",
+      "action": "posted job",
+      "subject": "barrom"
+    },
+    {
+      "id": "audit-40156a5631",
+      "at": 1779891560256,
+      "actor": "Employer Desk",
+      "action": "posted job",
+      "subject": "barrom"
+    },
+    {
+      "id": "audit-4f4313fd2b",
+      "at": 1779891560031,
+      "actor": "Employer Desk",
+      "action": "posted job",
+      "subject": "barrom"
+    },
+    {
+      "id": "audit-3d86a843ee",
+      "at": 1779891559814,
+      "actor": "Employer Desk",
+      "action": "posted job",
+      "subject": "barrom"
+    },
+    {
+      "id": "audit-7d04720759",
+      "at": 1779891559547,
+      "actor": "Employer Desk",
+      "action": "posted job",
+      "subject": "barrom"
+    },
+    {
+      "id": "audit-75d990629e",
+      "at": 1779891557747,
+      "actor": "Employer Desk",
+      "action": "posted job",
+      "subject": "barrom"
+    },
+    {
+      "id": "audit-0fc9d66764",
+      "at": 1779891228706,
+      "actor": "Employer Desk",
+      "action": "posted job",
+      "subject": "worker"
+    },
+    {
+      "id": "audit-cab34b71ca",
+      "at": 1779891225114,
+      "actor": "Employer Desk",
+      "action": "posted job",
+      "subject": "worker"
+    },
+    {
+      "id": "audit-99d3584322",
+      "at": 1779891224890,
+      "actor": "Employer Desk",
+      "action": "posted job",
+      "subject": "worker"
+    },
+    {
+      "id": "audit-407276caf2",
+      "at": 1779891224455,
+      "actor": "Employer Desk",
+      "action": "posted job",
+      "subject": "worker"
+    },
+    {
+      "id": "audit-11ce8c9ccb",
+      "at": 1779891218884,
+      "actor": "Employer Desk",
+      "action": "posted job",
+      "subject": "worker"
+    },
+    {
+      "id": "audit-5938e41b93",
+      "at": 1779891108528,
+      "actor": "System",
+      "action": "registered user",
+      "subject": "leul (Worker)"
+    },
+    {
+      "id": "audit-da5642e1b6",
+      "at": 1779891094120,
+      "actor": "System",
+      "action": "registered user",
+      "subject": "leul (Worker)"
+    },
+    {
+      "id": "audit-1",
+      "at": 1780000500000,
+      "actor": "Admin",
+      "action": "verified worker",
+      "subject": "Mekdes T."
+    },
+    {
+      "id": "audit-2",
+      "at": 1780000501000,
+      "actor": "Broker Desk",
+      "action": "created placement",
+      "subject": "Dawit K. to Lucy Restaurant Group"
+    },
+    {
+      "id": "audit-3",
+      "at": 1780000502000,
+      "actor": "Support Desk",
+      "action": "opened ticket",
+      "subject": "National ID verification"
+    }
+  ],
+  "applications": [
+    {
+      "id": "app-323893dbe9",
+      "jobId": "job-f28b5659d1",
+      "jobTitle": "barrom",
+      "workerId": "user-676a886f39",
+      "workerName": "Amit Gebremichael",
+      "employer": "barrom",
+      "employerId": "",
+      "message": "API verification test",
+      "status": "Submitted",
+      "createdAt": 1779968808524
+    }
+  ],
+  "notifications": [
+    {
+      "id": "note-455e748517",
+      "userId": "user-676a886f39",
+      "title": "Profile updated",
+      "body": "Your account profile was updated.",
+      "kind": "info",
+      "read": false,
+      "createdAt": 1779968808528
+    },
+    {
+      "id": "note-f0a44e234c",
+      "userId": "user-676a886f39",
+      "title": "Application submitted",
+      "body": "You applied for barrom.",
+      "kind": "success",
+      "read": true,
+      "createdAt": 1779968808524
+    }
+  ]
+}

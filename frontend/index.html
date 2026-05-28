@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Abinet Connect</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Role navigation">
+        <a class="brand" href="#overview" aria-label="Abinet Connect home">
+          <span class="brand-mark">AC</span>
+          <span>
+            <strong>Abinet Connect</strong>
+            <small>Employment platform</small>
+          </span>
+        </a>
+
+        <div class="sidebar-card">
+          <span class="pulse"></span>
+          <div>
+            <strong>Choose a card</strong>
+            <small>The platform changes based on the role you select</small>
+          </div>
+        </div>
+      </aside>
+
+      <div class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Abinet Connect</p>
+            <h1 id="pageTitle">Choose your role</h1>
+          </div>
+          <div class="topbar-actions">
+            <button id="publicRegister" type="button">Register</button>
+            <button id="publicSignIn" class="secondary-button" type="button">Sign in</button>
+            <button id="publicLogout" class="secondary-button hidden" type="button">Log out</button>
+          </div>
+        </header>
+
+        <main>
+          <section id="overview" class="page active-page" data-page="overview">
+            <div class="hero-panel">
+              <div class="hero-copy">
+                <p class="eyebrow">Start with your goal</p>
+                <h2>Choose how you want to use the employment exchange.</h2>
+                <p>
+                  New visitors get a role-specific experience immediately. Employers see hiring tools,
+                  workers see job and verification tools, and brokers see placement operations.
+                </p>
+              </div>
+              <div class="hero-metrics" id="heroMetrics"></div>
+            </div>
+            <div class="role-picker" aria-label="Interactive role selection">
+              <button class="role-card employer-card" type="button" data-role-choice="employer">
+                <span>I Need Workers</span>
+                <strong>Employer</strong>
+                <small>Post jobs, find verified workers, and manage hiring.</small>
+              </button>
+              <button class="role-card employee-card" type="button" data-role-choice="employee">
+                <span>I Need a Job</span>
+                <strong>Worker</strong>
+                <small>Find available jobs, complete your profile, and track verification.</small>
+              </button>
+              <button class="role-card broker-card" type="button" data-role-choice="broker">
+                <span>I’m a Broker</span>
+                <strong>Agency / Broker</strong>
+                <small>Assign workers, track placements, and manage commissions.</small>
+              </button>
+            </div>
+            <form id="publicLoginForm" class="panel form-panel public-login-panel hidden">
+              <p class="eyebrow">Client sign in</p>
+              <h2>Sign in to your account</h2>
+              <label>Username<input name="username" required autocomplete="username" placeholder="your.username" /></label>
+              <label>Password<input name="password" required type="password" autocomplete="current-password" placeholder="Your password" /></label>
+              <button type="submit">Sign in</button>
+            </form>
+            <section id="accountDashboard" class="account-dashboard hidden" aria-label="Signed in account dashboard"></section>
+            <div id="dynamicExperience" class="dynamic-experience"></div>
+            <div class="metric-grid" id="metricGrid" aria-label="Platform metrics"></div>
+          </section>
+
+          <section id="admin" class="page" data-page="admin">
+            <form id="adminLoginForm" class="panel form-panel admin-login-panel">
+              <p class="eyebrow">Private staff access</p>
+              <h2>Admin sign in</h2>
+              <label>Username<input name="username" required autocomplete="username" placeholder="admin" /></label>
+              <label>Password<input name="password" required type="password" autocomplete="current-password" placeholder="admin123" /></label>
+              <button type="submit">Sign in</button>
+            </form>
+            <div id="adminPrivateArea" class="locked-area">
+            <div class="role-banner">
+              <p class="eyebrow">Admin workspace</p>
+              <h2>Verification, risk, reporting, and platform control.</h2>
+            </div>
+            <div class="metric-grid compact-metrics" id="adminMetrics"></div>
+            <div class="section-grid">
+              <div class="panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Trust center</p>
+                    <h2>Verification queue</h2>
+                  </div>
+                </div>
+                <div id="verificationQueue" class="stack-list"></div>
+              </div>
+              <div class="panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Risk monitoring</p>
+                    <h2>Audit activity</h2>
+                  </div>
+                </div>
+                <div id="auditLog" class="timeline"></div>
+              </div>
+            </div>
+            <form id="staffRegisterForm" class="panel form-panel master-only">
+              <p class="eyebrow">Master admin only</p>
+              <h2>Create manager account</h2>
+              <label>Name<input name="name" required placeholder="Admin full name" /></label>
+              <label>Phone<input name="phone" required placeholder="+251911000000" /></label>
+              <label>Staff role
+                <select name="role">
+                  <option>Manager</option>
+                  <option>MasterAdmin</option>
+                </select>
+              </label>
+              <label>Username<input name="username" required autocomplete="username" placeholder="new.admin" /></label>
+              <label>Password<input name="password" required type="password" autocomplete="new-password" placeholder="Minimum 6 characters" /></label>
+              <label>Address<input name="address" placeholder="Addis Ababa" /></label>
+              <button type="submit">Create staff account</button>
+            </form>
+            <div class="panel manager-note master-only">
+              <p class="eyebrow">Permission model</p>
+              <h2>Master Admin vs Manager</h2>
+              <p>Master Admin creates staff and controls system setup. Managers verify workers, add job categories, review risk, and support daily operations.</p>
+            </div>
+            <form id="categoryForm" class="panel form-panel">
+              <p class="eyebrow">Job categories</p>
+              <h2>Add job category</h2>
+              <label>Category name<input name="name" required placeholder="Healthcare, Construction, Security" /></label>
+              <label>Description<input name="description" placeholder="Short category description" /></label>
+              <button type="submit">Add category</button>
+            </form>
+            </div>
+          </section>
+
+          <section id="employer" class="page" data-page="employer">
+            <div class="role-banner employer-banner">
+              <p class="eyebrow">Employer workspace</p>
+              <h2>Post jobs, review open demand, and find suitable workers.</h2>
+            </div>
+            <div class="section-grid">
+              <div class="panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Hiring desk</p>
+                    <h2>Open demand</h2>
+                  </div>
+                  <span class="quiet-badge" id="openJobsCount">0 open</span>
+                </div>
+                <div id="jobList" class="stack-list"></div>
+              </div>
+              <form id="jobForm" class="panel form-panel">
+                <p class="eyebrow">Create demand</p>
+                <h2>Post job</h2>
+                <label>Job title<input name="title" required placeholder="Live-out house worker" /></label>
+                <label>Employer<input name="employer" required placeholder="Family or company" /></label>
+                <label>Location<input name="location" required placeholder="Addis Ababa" /></label>
+                <label>Category<select name="category" id="jobCategorySelect"></select></label>
+                <label>Skills<input name="skills" placeholder="Cleaning, cooking" /></label>
+                <label>Salary<input name="salary" placeholder="8,500 ETB/month" /></label>
+                <button type="submit">Publish job</button>
+              </form>
+            </div>
+          </section>
+
+          <section id="employee" class="page" data-page="employee">
+            <div class="role-banner employee-banner">
+              <p class="eyebrow">Employee workspace</p>
+              <h2>Worker profiles, availability, reputation, and job readiness.</h2>
+            </div>
+            <div class="section-grid marketplace-grid">
+              <div class="panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Available jobs</p>
+                    <h2>Apply to open work</h2>
+                  </div>
+                  <span class="quiet-badge" id="workerJobsCount">0 open</span>
+                </div>
+                <div id="availableJobList" class="stack-list"></div>
+              </div>
+              <div class="panel wide-panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Worker marketplace</p>
+                    <h2>Employee network</h2>
+                  </div>
+                  <div class="filter-bar">
+                    <input id="skillFilter" placeholder="Skill" />
+                    <input id="locationFilter" placeholder="Location" />
+                    <select id="verifiedFilter" aria-label="Verification filter">
+                      <option value="">All</option>
+                      <option value="true">Verified</option>
+                      <option value="false">Pending</option>
+                    </select>
+                    <button id="searchWorkers" type="button">Search</button>
+                  </div>
+                </div>
+                <div id="workerTable" class="data-table"></div>
+              </div>
+              <form id="registerForm" class="panel form-panel">
+                <p class="eyebrow">Worker intake</p>
+                <h2>Register profile</h2>
+                <label>Name<input name="name" required placeholder="Full name or organization" /></label>
+                <label>Phone<input name="phone" required placeholder="+251911000000" /></label>
+                <label>Username<input name="username" required autocomplete="username" placeholder="your.username" /></label>
+                <label>Password<input name="password" required type="password" autocomplete="new-password" placeholder="Minimum 6 characters" /></label>
+                <label>Role
+                  <select name="role" required>
+                    <option>Worker</option>
+                    <option>Employer</option>
+                    <option>Broker</option>
+                    <option>Support</option>
+                  </select>
+                </label>
+                <label>
+                  National ID (FAN)
+                  <input name="nationalId" id="nationalIdInput" placeholder="Required for employers, optional for workers" />
+                </label>
+                <p id="nationalIdHint" class="field-hint">Required for Employer registration. Optional for Worker registration.</p>
+                <label>Address<input name="address" placeholder="Bole, Addis Ababa" /></label>
+                <label>Skills<input name="skills" placeholder="Cleaning, cooking, delivery" /></label>
+                <label>Availability<input name="availability" placeholder="Available now" /></label>
+                <button type="submit">Create profile</button>
+              </form>
+            </div>
+          </section>
+
+          <section id="broker" class="page" data-page="broker">
+            <div class="role-banner broker-banner">
+              <p class="eyebrow">Broker workspace</p>
+              <h2>Manage placements, commissions, agencies, and worker assignments.</h2>
+            </div>
+            <div class="section-grid">
+              <form id="placementForm" class="panel form-panel">
+                <p class="eyebrow">Placement desk</p>
+                <h2>Assign placement</h2>
+                <label>Worker<input name="worker" required placeholder="Worker name" /></label>
+                <label>Employer<input name="employer" required placeholder="Employer name" /></label>
+                <label>Broker<input name="broker" required placeholder="Agency or broker" /></label>
+                <label>Commission<input name="commission" placeholder="1,500 ETB" /></label>
+                <button type="submit">Create placement</button>
+              </form>
+              <div class="panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Pipeline</p>
+                    <h2>Brokerage operations</h2>
+                  </div>
+                </div>
+                <div id="placementList" class="stack-list"></div>
+              </div>
+            </div>
+          </section>
+
+          <section id="support" class="page" data-page="support">
+            <div class="role-banner support-banner">
+              <p class="eyebrow">Support workspace</p>
+              <h2>Resolve registration, verification, scheduling, and placement issues.</h2>
+            </div>
+            <div class="section-grid">
+              <div class="panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Support desk</p>
+                    <h2>Tickets</h2>
+                  </div>
+                </div>
+                <div id="ticketList" class="stack-list"></div>
+              </div>
+              <form id="ticketForm" class="panel form-panel">
+                <p class="eyebrow">Customer care</p>
+                <h2>Open ticket</h2>
+                <label>Requester<input name="requester" required placeholder="Worker, employer, or broker" /></label>
+                <label>Topic<input name="topic" required placeholder="Verification, placement, payment" /></label>
+                <label>Priority
+                  <select name="priority">
+                    <option>Medium</option>
+                    <option>High</option>
+                    <option>Low</option>
+                  </select>
+                </label>
+                <button type="submit">Submit ticket</button>
+              </form>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <div id="toast" role="status" aria-live="polite"></div>
+    <script src="/app.js"></script>
+  </body>
+</html>
