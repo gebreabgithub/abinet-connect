@@ -37,6 +37,35 @@ If port `8000` is busy:
 python3 backend/app.py --port 8080
 ```
 
+## Android installable app
+
+This project now includes a Progressive Web App setup:
+
+- `frontend/manifest.webmanifest`
+- `frontend/service-worker.js`
+- `frontend/assets/icon.svg`
+
+To install on Android:
+
+1. Run the backend on a phone-accessible host, not only `127.0.0.1`.
+2. Open the site in Android Chrome.
+3. Tap the Chrome menu.
+4. Tap **Add to Home screen** or **Install app**.
+
+For local network testing from a phone:
+
+```bash
+python3 backend/app.py --host 0.0.0.0 --port 8080
+```
+
+Then open this from the Android phone, replacing the IP with the computer IP:
+
+```text
+http://YOUR_COMPUTER_IP:8080
+```
+
+For a real Play Store APK later, wrap this web app with Capacitor or rebuild the client in native Android/Kotlin and connect it to the same backend API.
+
 ## Suggested production stack
 
 The PDF recommends:

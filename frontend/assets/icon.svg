@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Abinet Connect</title>
+  <rect width="512" height="512" rx="108" fill="#166534"/>
+  <path d="M128 336 230 116h54l102 220h-58l-20-48H205l-20 48h-57Zm96-94h66l-33-79-33 79Z" fill="#fff"/>
+  <path d="M150 382c70 34 142 34 212 0" fill="none" stroke="#facc15" stroke-width="28" stroke-linecap="round"/>
+</svg>

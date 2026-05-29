@@ -1,0 +1,37 @@
+{
+  "name": "Abinet Connect",
+  "short_name": "Abinet",
+  "description": "International employment marketplace for employers, workers, and brokers.",
+  "start_url": "/?source=pwa#overview",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#166534",
+  "background_color": "#f5f7fb",
+  "categories": ["business", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Create Account",
+      "short_name": "Register",
+      "url": "/?source=pwa#employee"
+    },
+    {
+      "name": "Find Workers",
+      "short_name": "Workers",
+      "url": "/?source=pwa#employer"
+    },
+    {
+      "name": "Broker Desk",
+      "short_name": "Broker",
+      "url": "/?source=pwa#broker"
+    }
+  ]
+}
