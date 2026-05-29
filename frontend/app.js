@@ -510,6 +510,97 @@ function renderAudit() {
   `).join("") || `<div class="empty-state">No audit events yet.</div>`;
 }
 
+function dashboardCard(title, value, detail, action = "") {
+  return `
+    <article class="dashboard-card">
+      <span>${escapeHtml(title)}</span>
+      <strong>${escapeHtml(value)}</strong>
+      <p>${escapeHtml(detail)}</p>
+      ${action}
+    </article>
+  `;
+}
+
+function renderRoleDashboards() {
+  const openJobs = state.jobs.filter((job) => job.status === "Open");
+  const submittedApplications = state.applications.filter((item) => item.status === "Submitted");
+  const activePlacements = state.placements.filter((item) => !["Closed", "Cancelled"].includes(item.status));
+  const pendingPayments = state.payments.filter((item) => item.status !== "Paid");
+  const openTickets = state.supportTickets.filter((item) => item.status !== "Closed");
+  const pendingWorkers = state.workers.filter((worker) => !worker.verified);
+  const safetyReports = state.safetyReports || [];
+  const complianceRequests = state.complianceRequests || [];
+
+  qs("#employerDashboard").innerHTML = [
+    dashboardCard("Posted jobs", state.jobs.length, "All demand records published in the marketplace.", `<button class="small-button" type="button" data-scroll-target="jobForm">Post job</button>`),
+    dashboardCard("Applicants", submittedApplications.length, "Applications waiting for review and shortlist decisions."),
+    dashboardCard("Active placements", activePlacements.length, "Workers currently in scheduled or trial placements."),
+    dashboardCard("Payments", pendingPayments.length, "Invoices, wallet, commission, and payment records."),
+    dashboardCard("Support tickets", openTickets.length, "Open employer, worker, and broker support issues.", `<button class="small-button" type="button" data-open-page="support">Open support</button>`),
+  ].join("");
+
+  qs("#workerDashboard").innerHTML = [
+    dashboardCard("Profile completion", `${profileCompletionScore()}%`, "Profile strength based on identity, contact, skills, and location."),
+    dashboardCard("Available jobs", openJobs.length, "Open jobs ready for worker applications."),
+    dashboardCard("Applications", state.applications.length, "Submitted applications and placement progress."),
+    dashboardCard("Verification", `${state.stats.verificationRate || 0}%`, "Platform worker verification coverage."),
+    dashboardCard("Safety reports", safetyReports.length, "Emergency, employer report, dispute, and workplace safety cases.", `<button class="small-button" type="button" data-open-page="support">Report safety</button>`),
+  ].join("");
+
+  qs("#brokerDashboard").innerHTML = [
+    dashboardCard("Managed workers", state.workers.length, "Worker profiles available for placement and verification."),
+    dashboardCard("Employer requests", openJobs.length, "Open employer demand that brokers can help fulfill."),
+    dashboardCard("Placements", state.placements.length, "Placement records and assignment pipeline."),
+    dashboardCard("Commission", pendingPayments.length, "Pending invoices, wallet records, and commission tracking.", `<button class="small-button" type="button" data-scroll-target="paymentForm">Create invoice</button>`),
+    dashboardCard("Performance report", `${activePlacements.length} active`, "Current active placement performance signal."),
+  ].join("");
+
+  qs("#adminOpsDashboard").innerHTML = [
+    dashboardCard("Users", state.users.length, "Employers, workers, brokers, and staff identities."),
+    dashboardCard("Countries", uniqueCount(state.users.map((user) => user.country)), "Country coverage from registered identities."),
+    dashboardCard("Categories", state.jobCategories.length, "Job categories managed by staff.", `<button class="small-button" type="button" data-scroll-target="categoryForm">Add category</button>`),
+    dashboardCard("Verifications", pendingWorkers.length, "Workers waiting for staff verification."),
+    dashboardCard("Fraud alerts", state.fraudAlerts.length, "Risk signals and suspicious account activity."),
+    dashboardCard("Payments", state.payments.length, "Finance records and invoice activity."),
+    dashboardCard("Reports", safetyReports.length + complianceRequests.length, "Safety and compliance reports requiring review."),
+    dashboardCard("Audit logs", state.auditLog.length, "Recent staff and system actions."),
+  ].join("");
+
+  document.querySelectorAll("[data-open-page]").forEach((button) => {
+    button.addEventListener("click", () => {
+      window.location.hash = button.dataset.openPage;
+      showPage();
+    });
+  });
+
+  document.querySelectorAll("[data-scroll-target]").forEach((button) => {
+    button.addEventListener("click", () => {
+      qs(`#${button.dataset.scrollTarget}`)?.scrollIntoView({ block: "start", behavior: "smooth" });
+    });
+  });
+}
+
+function uniqueCount(values) {
+  return new Set(values.filter(Boolean)).size;
+}
+
+function profileCompletionScore() {
+  if (!state.publicUser) return 0;
+  const profile = profileDetailsFor(state.publicUser);
+  const checks = [
+    state.publicUser.name,
+    state.publicUser.phone,
+    state.publicUser.country,
+    state.publicUser.city,
+    state.publicUser.language,
+    state.publicUser.currency,
+    profile.identity !== "Not provided",
+    profile.worker?.skills?.length,
+    profile.worker?.availability,
+  ];
+  return Math.round((checks.filter(Boolean).length / checks.length) * 100);
+}
+
 function profileDetailsFor(user) {
   const worker = state.workers.find((item) => item.id === user.id || item.phone === user.phone);
   const roleActions = {
@@ -690,6 +781,7 @@ function renderAll() {
   renderVerificationQueue();
   renderTickets();
   renderAudit();
+  renderRoleDashboards();
 }
 
 function currentPage() {

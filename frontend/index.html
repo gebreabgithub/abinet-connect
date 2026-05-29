@@ -8,7 +8,7 @@
     <title>Abinet Connect</title>
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/assets/icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/styles.css?v=20260529-dashboards" />
   </head>
   <body>
     <div class="app-shell">
@@ -100,6 +100,7 @@
               <h2>International Multi-Country Employment Marketplace Architecture.</h2>
             </div>
             <div class="metric-grid compact-metrics" id="adminMetrics"></div>
+            <div id="adminOpsDashboard" class="dashboard-grid" aria-label="Admin operations dashboard"></div>
             <div class="panel">
               <p class="eyebrow">Operating model</p>
               <h2>Master Admin → Country Admin → Regional Manager → Support / Verification Team</h2>
@@ -182,6 +183,7 @@
               <p class="eyebrow">Employer workspace</p>
               <h2>Post jobs, review open demand, and find suitable workers.</h2>
             </div>
+            <div id="employerDashboard" class="dashboard-grid" aria-label="Employer dashboard"></div>
             <div class="section-grid">
               <div class="panel">
                 <div class="panel-header">
@@ -288,6 +290,7 @@
                 <label>Availability<input name="availability" placeholder="Available now" /></label>
                 <button id="registerSubmit" type="submit">Create worker account</button>
               </form>
+              <div id="workerDashboard" class="dashboard-grid" aria-label="Worker dashboard"></div>
               <div class="panel">
                 <div class="panel-header">
                   <div>
@@ -325,6 +328,7 @@
               <p class="eyebrow">Broker workspace</p>
               <h2>Manage placements, commissions, agencies, and worker assignments.</h2>
             </div>
+            <div id="brokerDashboard" class="dashboard-grid" aria-label="Broker dashboard"></div>
             <div class="section-grid">
               <form id="placementForm" class="panel form-panel">
                 <p class="eyebrow">Placement desk</p>
@@ -446,6 +450,6 @@
     </div>
 
     <div id="toast" role="status" aria-live="polite"></div>
-    <script src="/app.js"></script>
+    <script src="/app.js?v=20260529-dashboards"></script>
   </body>
 </html>
