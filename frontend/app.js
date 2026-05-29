@@ -288,8 +288,12 @@ function updateIdentityDocumentRequirement() {
   const roleSelect = qs("#registerForm select[name='role']");
   const identityNumber = qs("#identityDocumentNumberInput");
   const hint = qs("#identityDocumentHint");
+  const title = qs("#registerTitle");
+  const eyebrow = qs("#registerEyebrow");
+  const submit = qs("#registerSubmit");
   if (!roleSelect || !identityNumber || !hint) return;
   const employer = roleSelect.value === "Employer";
+  const roleLabel = roleSelect.value === "Broker" ? "broker / agency" : roleSelect.value.toLowerCase();
   identityNumber.required = employer;
   identityNumber.placeholder = employer
     ? "Required identity document number"
@@ -297,6 +301,33 @@ function updateIdentityDocumentRequirement() {
   hint.textContent = employer
     ? "Identity document number is required for employer accounts."
     : "Identity document number is optional for workers and broker accounts.";
+  if (title) title.textContent = `Create ${roleLabel} account`;
+  if (eyebrow) eyebrow.textContent = `${roleSelect.value} registration`;
+  if (submit) submit.textContent = `Create ${roleLabel} account`;
+  document.querySelectorAll("[data-register-role]").forEach((button) => {
+    button.classList.toggle("selected", button.dataset.registerRole === roleSelect.value);
+  });
+}
+
+function openRegistration(role = "Worker") {
+  window.location.hash = "employee";
+  showPage();
+  const roleSelect = qs("#registerForm select[name='role']");
+  if (roleSelect) {
+    roleSelect.value = role;
+    updateIdentityDocumentRequirement();
+  }
+  qs("#registerForm")?.scrollIntoView({ block: "start", behavior: "smooth" });
+}
+
+function openPublicSignIn(username = "") {
+  window.location.hash = "overview";
+  showPage();
+  const form = qs("#publicLoginForm");
+  form.classList.remove("hidden");
+  const usernameInput = qs("#publicLoginForm input[name='username']");
+  if (username) usernameInput.value = username;
+  qs("#publicLoginForm input[name='password']").focus();
 }
 
 function renderRoleExperience() {
@@ -723,14 +754,10 @@ async function loadAll() {
 
 function wireForms() {
   qs("#publicRegister").addEventListener("click", () => {
-    window.location.hash = "employee";
-    showPage();
+    openRegistration("Worker");
   });
   qs("#publicSignIn").addEventListener("click", () => {
-    window.location.hash = "overview";
-    showPage();
-    qs("#publicLoginForm").classList.remove("hidden");
-    qs("#publicLoginForm input[name='username']").focus();
+    openPublicSignIn();
   });
   qs("#publicLogout").addEventListener("click", () => {
     state.publicToken = "";
@@ -745,6 +772,12 @@ function wireForms() {
     card.addEventListener("click", () => {
       state.selectedRole = card.dataset.roleChoice;
       renderRoleExperience();
+    });
+  });
+
+  document.querySelectorAll("[data-register-role]").forEach((button) => {
+    button.addEventListener("click", () => {
+      openRegistration(button.dataset.registerRole);
     });
   });
 
@@ -784,9 +817,11 @@ function wireForms() {
           availability: form.get("availability"),
         }),
       });
+      const username = form.get("username");
       formElement.reset();
-      toast("Profile created and queued for verification.");
+      toast("Account created. Sign in with your username and password.");
       await loadAll();
+      openPublicSignIn(username);
     } catch (error) {
       if (error.message.includes("Admin login")) {
         clearAdminSession();

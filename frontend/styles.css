@@ -609,6 +609,23 @@ main {
   gap: 10px;
 }
 
+.register-role-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.register-role-actions button {
+  min-height: 44px;
+  color: var(--ink);
+  background: #e2e8f0;
+}
+
+.register-role-actions button.selected {
+  color: #fff;
+  background: var(--brand);
+}
+
 .architecture-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(150px, 1fr));
@@ -932,6 +949,7 @@ main {
   .role-picker,
   .account-status-grid,
   .action-grid,
+  .register-role-actions,
   .architecture-grid,
   .table-row {
     grid-template-columns: 1fr;

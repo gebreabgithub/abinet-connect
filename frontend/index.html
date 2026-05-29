@@ -250,8 +250,13 @@
                 <div id="workerTable" class="data-table"></div>
               </div>
               <form id="registerForm" class="panel form-panel">
-                <p class="eyebrow">Worker intake</p>
-                <h2>Register profile</h2>
+                <p class="eyebrow" id="registerEyebrow">Public account</p>
+                <h2 id="registerTitle">Create worker account</h2>
+                <div class="register-role-actions" aria-label="Choose account type">
+                  <button class="secondary-button selected" type="button" data-register-role="Worker">Worker</button>
+                  <button class="secondary-button" type="button" data-register-role="Employer">Employer</button>
+                  <button class="secondary-button" type="button" data-register-role="Broker">Broker / Agency</button>
+                </div>
                 <label>Name<input name="name" required placeholder="Full name or organization" /></label>
                 <label>Phone<input name="phone" required placeholder="+251911000000" /></label>
                 <label>Username<input name="username" required autocomplete="username" placeholder="your.username" /></label>
@@ -305,7 +310,7 @@
                 </label>
                 <label>Skills<input name="skills" placeholder="Cleaning, cooking, delivery" /></label>
                 <label>Availability<input name="availability" placeholder="Available now" /></label>
-                <button type="submit">Create profile</button>
+                <button id="registerSubmit" type="submit">Create worker account</button>
               </form>
             </div>
           </section>
