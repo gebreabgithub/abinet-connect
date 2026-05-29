@@ -671,6 +671,21 @@ main {
   grid-template-columns: minmax(0, 1fr) 340px;
 }
 
+#employee #registerForm {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  position: sticky;
+  top: 104px;
+}
+
+#employee .marketplace-grid > .panel:not(.wide-panel) {
+  grid-column: 1;
+}
+
+#employee .marketplace-grid > .wide-panel {
+  grid-column: 1;
+}
+
 .panel {
   padding: 18px;
 }
@@ -925,6 +940,17 @@ main {
 
   .topbar-actions {
     display: grid;
+  }
+
+  #employee #registerForm,
+  #employee .marketplace-grid > .panel,
+  #employee .marketplace-grid > .wide-panel {
+    grid-column: auto;
+  }
+
+  #employee #registerForm {
+    order: -1;
+    position: static;
   }
 
   .hero-panel {
