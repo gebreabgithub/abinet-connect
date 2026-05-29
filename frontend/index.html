@@ -220,38 +220,10 @@
               <h2>Worker profiles, availability, reputation, and job readiness.</h2>
             </div>
             <div class="section-grid marketplace-grid">
-              <div class="panel">
-                <div class="panel-header">
-                  <div>
-                    <p class="eyebrow">Available jobs</p>
-                    <h2>Apply to open work</h2>
-                  </div>
-                  <span class="quiet-badge" id="workerJobsCount">0 open</span>
-                </div>
-                <div id="availableJobList" class="stack-list"></div>
-              </div>
-              <div class="panel wide-panel">
-                <div class="panel-header">
-                  <div>
-                    <p class="eyebrow">Worker marketplace</p>
-                    <h2>Employee network</h2>
-                  </div>
-                  <div class="filter-bar">
-                    <input id="skillFilter" placeholder="Skill" />
-                    <input id="locationFilter" placeholder="Location" />
-                    <select id="verifiedFilter" aria-label="Verification filter">
-                      <option value="">All</option>
-                      <option value="true">Verified</option>
-                      <option value="false">Pending</option>
-                    </select>
-                    <button id="searchWorkers" type="button">Search</button>
-                  </div>
-                </div>
-                <div id="workerTable" class="data-table"></div>
-              </div>
               <form id="registerForm" class="panel form-panel">
                 <p class="eyebrow" id="registerEyebrow">Public account</p>
                 <h2 id="registerTitle">Create worker account</h2>
+                <p class="form-intro">Create a username and password here. After registration, sign in with the same username and password to manage your profile, jobs, and applications.</p>
                 <div class="register-role-actions" aria-label="Choose account type">
                   <button class="secondary-button selected" type="button" data-register-role="Worker">Worker</button>
                   <button class="secondary-button" type="button" data-register-role="Employer">Employer</button>
@@ -312,6 +284,35 @@
                 <label>Availability<input name="availability" placeholder="Available now" /></label>
                 <button id="registerSubmit" type="submit">Create worker account</button>
               </form>
+              <div class="panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Available jobs</p>
+                    <h2>Apply to open work</h2>
+                  </div>
+                  <span class="quiet-badge" id="workerJobsCount">0 open</span>
+                </div>
+                <div id="availableJobList" class="stack-list"></div>
+              </div>
+              <div class="panel wide-panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Worker marketplace</p>
+                    <h2>Employee network</h2>
+                  </div>
+                  <div class="filter-bar">
+                    <input id="skillFilter" placeholder="Skill" />
+                    <input id="locationFilter" placeholder="Location" />
+                    <select id="verifiedFilter" aria-label="Verification filter">
+                      <option value="">All</option>
+                      <option value="true">Verified</option>
+                      <option value="false">Pending</option>
+                    </select>
+                    <button id="searchWorkers" type="button">Search</button>
+                  </div>
+                </div>
+                <div id="workerTable" class="data-table"></div>
+              </div>
             </div>
           </section>
 

@@ -685,14 +685,37 @@ main {
 }
 
 .marketplace-grid {
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
 }
 
 #employee #registerForm {
-  grid-column: 2;
-  grid-row: 1 / span 2;
-  position: sticky;
-  top: 104px;
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 14px;
+  padding: clamp(18px, 3vw, 28px);
+  border-color: rgba(15, 118, 110, 0.35);
+  box-shadow: 0 18px 42px rgba(15, 118, 110, 0.11);
+}
+
+#employee #registerForm .eyebrow,
+#employee #registerForm h2,
+#employee #registerForm .form-intro,
+#employee #registerForm .register-role-actions,
+#employee #registerForm .field-hint,
+#employee #registerForm button[type="submit"] {
+  grid-column: 1 / -1;
+}
+
+#employee #registerForm h2 {
+  font-size: clamp(1.45rem, 3vw, 2.05rem);
+}
+
+.form-intro {
+  margin: -4px 0 2px;
+  max-width: 840px;
+  color: var(--muted);
+  line-height: 1.45;
 }
 
 #employee .marketplace-grid > .panel:not(.wide-panel) {
@@ -700,7 +723,14 @@ main {
 }
 
 #employee .marketplace-grid > .wide-panel {
-  grid-column: 1;
+  grid-column: 2;
+}
+
+#availableJobList,
+#workerTable {
+  max-height: 720px;
+  overflow: auto;
+  padding-right: 4px;
 }
 
 .panel {
@@ -967,7 +997,7 @@ main {
   }
 
   #employee #registerForm {
-    order: -1;
+    grid-template-columns: 1fr;
     position: static;
   }
 
