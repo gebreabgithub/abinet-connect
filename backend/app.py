@@ -16,8 +16,26 @@ import uuid
 ROOT = Path(__file__).resolve().parents[1]
 FRONTEND_DIR = ROOT / "frontend"
 DATA_FILE = Path(__file__).with_name("data.json")
-ROLES = {"Employer", "Worker", "Broker", "Manager", "MasterAdmin", "Support"}
-STAFF_ROLES = {"Manager", "MasterAdmin"}
+PUBLIC_ROLES = {"Employer", "Worker", "Broker"}
+STAFF_ROLES = {
+    "MasterAdmin",
+    "CountryAdmin",
+    "RegionalManager",
+    "VerificationOfficer",
+    "SupportAgent",
+    "FinanceOfficer",
+    "ComplianceOfficer",
+    "Manager",
+}
+ROLES = PUBLIC_ROLES | STAFF_ROLES
+IDENTITY_DOCUMENT_TYPES = {
+    "National ID",
+    "Passport",
+    "Refugee ID",
+    "Residence Permit",
+    "Driver License",
+    "Other Government ID",
+}
 SESSIONS = {}
 
 
@@ -100,6 +118,9 @@ def public_bootstrap(data):
         "placements": data.get("placements", []),
         "brokers": data.get("brokers", []),
         "supportTickets": data.get("supportTickets", []),
+        "complianceRequests": data.get("complianceRequests", []),
+        "safetyReports": data.get("safetyReports", []),
+        "payments": data.get("payments", []),
         "fraudAlerts": data.get("fraudAlerts", []),
         "auditLog": data.get("auditLog", [])[-12:],
         "stats": build_stats(data),
@@ -135,6 +156,9 @@ def build_stats(data):
         "averageRating": avg_rating,
         "applications": len(data.get("applications", [])),
         "unreadNotifications": len([item for item in data.get("notifications", []) if not item.get("read")]),
+        "payments": len(data.get("payments", [])),
+        "safetyReports": len(data.get("safetyReports", [])),
+        "complianceRequests": len(data.get("complianceRequests", [])),
     }
 
 
@@ -224,6 +248,12 @@ class BrokerHandler(BaseHTTPRequestHandler):
                 return self.json(store.read().get("brokers", []))
             if route == "/api/support/tickets":
                 return self.json(store.read().get("supportTickets", []))
+            if route == "/api/compliance/requests":
+                return self.json(store.read().get("complianceRequests", []))
+            if route == "/api/safety/reports":
+                return self.json(store.read().get("safetyReports", []))
+            if route == "/api/payments":
+                return self.json(store.read().get("payments", []))
             if route == "/api/admin/verification-queue":
                 workers = [worker for worker in store.read().get("workers", []) if not worker.get("verified")]
                 return self.json(workers)
@@ -257,6 +287,12 @@ class BrokerHandler(BaseHTTPRequestHandler):
                 return self.json(self.create_placement(body), 201)
             if route == "/api/support/tickets":
                 return self.json(self.create_ticket(body), 201)
+            if route == "/api/compliance/requests":
+                return self.json(self.create_compliance_request(body), 201)
+            if route == "/api/safety/reports":
+                return self.json(self.create_safety_report(body), 201)
+            if route == "/api/payments":
+                return self.json(self.create_payment(body), 201)
             return self.json({"error": "Route not found"}, 404)
         except ApiError as error:
             return self.json({"error": error.message, **error.details}, error.status)
@@ -343,13 +379,13 @@ class BrokerHandler(BaseHTTPRequestHandler):
     def require_staff(self):
         user = self.require_session()
         if user.get("role") not in STAFF_ROLES:
-            raise ApiError("Manager or master admin login required", 403)
+            raise ApiError("Staff login required", 403)
         return user
 
     def require_master(self):
         user = self.require_session()
-        if user.get("role") != "MasterAdmin":
-            raise ApiError("Master admin access required", 403)
+        if user.get("role") not in {"MasterAdmin", "CountryAdmin"}:
+            raise ApiError("Master admin or country admin access required", 403)
         return user
 
     def login(self, body):
@@ -420,17 +456,24 @@ class BrokerHandler(BaseHTTPRequestHandler):
         name = str(body.get("name", "")).strip()
         phone = normalize_phone(body.get("phone"))
         role = str(body.get("role", "")).strip().title()
+        if role in {"Employee", "Worker / Employee"}:
+            role = "Worker"
+        if role in {"Agency", "Broker / Agency"}:
+            role = "Broker"
         username = str(body.get("username", "")).strip().lower()
         password = str(body.get("password", ""))
-        national_id = str(body.get("nationalId", "")).strip()
+        identity_document_type = str(body.get("identityDocumentType") or body.get("nationalIdType") or "National ID").strip()
+        identity_document_number = str(body.get("identityDocumentNumber") or body.get("nationalId") or "").strip()
+        if identity_document_type not in IDENTITY_DOCUMENT_TYPES:
+            identity_document_type = "Other Government ID"
         if not name or not phone or role not in ROLES:
             raise ApiError("Name, phone, and a valid role are required", 400)
-        if role in STAFF_ROLES:
+        if role not in PUBLIC_ROLES:
             raise ApiError("Staff registration is restricted. Master admin approval is required.", 403)
         if not username or len(password) < 6:
             raise ApiError("Username and a password of at least 6 characters are required", 400)
-        if role == "Employer" and not national_id:
-            raise ApiError("National ID (FAN) is required for employers", 400)
+        if role == "Employer" and not identity_document_number:
+            raise ApiError("Identity document number is required for employers", 400)
 
         def mutate(data):
             for user in data.get("users", []):
@@ -447,12 +490,18 @@ class BrokerHandler(BaseHTTPRequestHandler):
                 "username": username,
                 "passwordHash": hash_password(password),
                 "role": role,
-                "nationalId": national_id,
-                "nationalIdStatus": "Submitted" if national_id else "Not provided",
+                "identityDocumentType": identity_document_type,
+                "identityDocumentNumber": identity_document_number,
+                "identityStatus": "Submitted" if identity_document_number else "Not provided",
+                "nationalId": identity_document_number,
+                "nationalIdStatus": "Submitted" if identity_document_number else "Not provided",
                 "address": str(body.get("address", "")).strip(),
                 "city": str(body.get("city", "Addis Ababa")).strip() or "Addis Ababa",
                 "country": str(body.get("country", "Ethiopia")).strip() or "Ethiopia",
                 "language": str(body.get("language", "Amharic / English")).strip(),
+                "currency": str(body.get("currency", "ETB")).strip() or "ETB",
+                "timezone": str(body.get("timezone", "Africa/Addis_Ababa")).strip() or "Africa/Addis_Ababa",
+                "preferredContactMethod": str(body.get("preferredContactMethod", "Phone")).strip() or "Phone",
                 "status": "Active",
                 "createdAt": now_ms(),
             }
@@ -471,9 +520,18 @@ class BrokerHandler(BaseHTTPRequestHandler):
                     "availability": str(body.get("availability", "Pending")).strip() or "Pending",
                     "rating": 0,
                     "verified": False,
-                    "verificationStatus": "FAN submitted" if national_id else "Pending",
-                    "nationalId": national_id,
-                    "nationalIdStatus": "Submitted" if national_id else "Optional",
+                    "verificationStatus": "Identity submitted" if identity_document_number else "Pending",
+                    "identityDocumentType": identity_document_type,
+                    "identityDocumentNumber": identity_document_number,
+                    "identityStatus": "Submitted" if identity_document_number else "Optional",
+                    "nationalId": identity_document_number,
+                    "nationalIdStatus": "Submitted" if identity_document_number else "Optional",
+                    "country": user["country"],
+                    "city": user["city"],
+                    "language": user["language"],
+                    "currency": user["currency"],
+                    "timezone": user["timezone"],
+                    "preferredContactMethod": user["preferredContactMethod"],
                     "riskLevel": "Normal",
                     "emergencyContact": str(body.get("emergencyContact", "")).strip(),
                     "completedJobs": 0,
@@ -491,9 +549,9 @@ class BrokerHandler(BaseHTTPRequestHandler):
         phone = normalize_phone(body.get("phone"))
         username = str(body.get("username", "")).strip().lower()
         password = str(body.get("password", ""))
-        role = str(body.get("role", "Manager")).strip()
-        if role not in {"Manager", "MasterAdmin"}:
-            raise ApiError("Staff role must be Manager or MasterAdmin", 400)
+        role = str(body.get("role", "RegionalManager")).strip()
+        if role not in STAFF_ROLES:
+            raise ApiError("Staff role is not supported", 400)
         if not name or not phone or not username or len(password) < 6:
             raise ApiError("Staff name, phone, username, and a password of at least 6 characters are required", 400)
 
@@ -515,6 +573,9 @@ class BrokerHandler(BaseHTTPRequestHandler):
                 "city": str(body.get("city", "Addis Ababa")).strip() or "Addis Ababa",
                 "country": str(body.get("country", "Ethiopia")).strip() or "Ethiopia",
                 "language": str(body.get("language", "Amharic / English")).strip(),
+                "currency": str(body.get("currency", "ETB")).strip() or "ETB",
+                "timezone": str(body.get("timezone", "Africa/Addis_Ababa")).strip() or "Africa/Addis_Ababa",
+                "preferredContactMethod": str(body.get("preferredContactMethod", "Email")).strip() or "Email",
                 "status": "Active",
                 "createdAt": now_ms(),
             }
@@ -564,6 +625,7 @@ class BrokerHandler(BaseHTTPRequestHandler):
                 "category": category,
                 "skills": parse_list(body.get("skills")),
                 "salary": str(body.get("salary", "Negotiable")).strip() or "Negotiable",
+                "currency": str(body.get("currency", "ETB")).strip() or "ETB",
                 "schedule": str(body.get("schedule", "Flexible")).strip() or "Flexible",
                 "status": "Open",
                 "priority": str(body.get("priority", "Standard")).strip() or "Standard",
@@ -657,11 +719,85 @@ class BrokerHandler(BaseHTTPRequestHandler):
 
         return store.update(mutate)
 
+    def create_compliance_request(self, body):
+        requester = str(body.get("requester", "")).strip()
+        request_type = str(body.get("requestType", "")).strip()
+        details = str(body.get("details", "")).strip()
+        if not requester or not request_type:
+            raise ApiError("Requester and request type are required", 400)
+
+        def mutate(data):
+            item = {
+                "id": make_id("privacy"),
+                "requester": requester,
+                "requestType": request_type,
+                "details": details,
+                "status": "Open",
+                "createdAt": now_ms(),
+            }
+            data.setdefault("complianceRequests", []).insert(0, item)
+            audit(data, "Compliance Desk", "opened compliance request", request_type)
+            return item
+
+        return store.update(mutate)
+
+    def create_safety_report(self, body):
+        reporter = str(body.get("reporter", "")).strip()
+        report_type = str(body.get("reportType", "")).strip()
+        details = str(body.get("details", "")).strip()
+        if not reporter or not report_type:
+            raise ApiError("Reporter and report type are required", 400)
+
+        def mutate(data):
+            item = {
+                "id": make_id("safety"),
+                "reporter": reporter,
+                "reportType": report_type,
+                "details": details,
+                "status": "Reviewing",
+                "createdAt": now_ms(),
+            }
+            data.setdefault("safetyReports", []).insert(0, item)
+            audit(data, "Safety Desk", "opened safety report", report_type)
+            return item
+
+        return store.update(mutate)
+
+    def create_payment(self, body):
+        payer = str(body.get("payer", "")).strip()
+        amount = str(body.get("amount", "")).strip()
+        method = str(body.get("method", "")).strip()
+        currency = str(body.get("currency", "ETB")).strip() or "ETB"
+        if not payer or not amount or not method:
+            raise ApiError("Payer, amount, and payment method are required", 400)
+
+        def mutate(data):
+            item = {
+                "id": make_id("pay"),
+                "payer": payer,
+                "amount": amount,
+                "currency": currency,
+                "method": method,
+                "status": "Pending",
+                "invoiceNumber": f"INV-{uuid.uuid4().hex[:8].upper()}",
+                "createdAt": now_ms(),
+            }
+            data.setdefault("payments", []).insert(0, item)
+            audit(data, "Finance Desk", "created payment record", item["invoiceNumber"])
+            return item
+
+        return store.update(mutate)
+
     def update_profile(self, user, target_id, body):
         if user.get("id") != target_id and user.get("role") not in STAFF_ROLES:
             raise ApiError("You can only update your own profile", 403)
 
-        allowed = {"name", "address", "city", "language", "availability", "skills", "salaryExpectation", "experience", "emergencyContact", "nationalId"}
+        allowed = {
+            "name", "address", "city", "country", "language", "currency", "timezone",
+            "preferredContactMethod", "availability", "skills", "salaryExpectation",
+            "experience", "emergencyContact", "identityDocumentType",
+            "identityDocumentNumber", "nationalId",
+        }
 
         def mutate(data):
             target = next((item for item in data.get("users", []) if item.get("id") == target_id), None)
@@ -670,15 +806,26 @@ class BrokerHandler(BaseHTTPRequestHandler):
             for key, value in body.items():
                 if key in allowed:
                     target[key] = parse_list(value) if key == "skills" else str(value).strip()
+            if body.get("identityDocumentNumber") or body.get("nationalId"):
+                target["identityStatus"] = "Submitted"
+                target["nationalIdStatus"] = "Submitted"
             worker = next((item for item in data.get("workers", []) if item.get("id") == target_id), None)
             if worker:
                 mapping = {
                     "name": "name",
                     "address": "location",
+                    "city": "city",
+                    "country": "country",
+                    "language": "language",
+                    "currency": "currency",
+                    "timezone": "timezone",
+                    "preferredContactMethod": "preferredContactMethod",
                     "availability": "availability",
                     "salaryExpectation": "salaryExpectation",
                     "experience": "experience",
                     "emergencyContact": "emergencyContact",
+                    "identityDocumentType": "identityDocumentType",
+                    "identityDocumentNumber": "identityDocumentNumber",
                     "nationalId": "nationalId",
                 }
                 for source, destination in mapping.items():
@@ -686,9 +833,10 @@ class BrokerHandler(BaseHTTPRequestHandler):
                         worker[destination] = str(body[source]).strip()
                 if "skills" in body:
                     worker["skills"] = parse_list(body["skills"])
-                if body.get("nationalId"):
+                if body.get("identityDocumentNumber") or body.get("nationalId"):
+                    worker["identityStatus"] = "Submitted"
                     worker["nationalIdStatus"] = "Submitted"
-                    worker["verificationStatus"] = "FAN submitted"
+                    worker["verificationStatus"] = "Identity submitted"
             notify(data, target_id, "Profile updated", "Your account profile was updated.", "info")
             audit(data, "Account", "updated profile", target.get("name", target_id))
             return public_user(target)

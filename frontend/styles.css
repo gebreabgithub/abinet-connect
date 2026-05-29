@@ -30,7 +30,8 @@ body {
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
@@ -59,7 +60,8 @@ button:hover {
 }
 
 input,
-select {
+select,
+textarea {
   width: 100%;
   min-height: 42px;
   border: 1px solid var(--line);
@@ -71,9 +73,16 @@ select {
 }
 
 input:focus,
-select:focus {
+select:focus,
+textarea:focus {
   border-color: var(--brand-2);
   box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+}
+
+textarea {
+  min-height: 108px;
+  padding: 10px 12px;
+  resize: vertical;
 }
 
 label {
@@ -600,6 +609,27 @@ main {
   gap: 10px;
 }
 
+.architecture-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.architecture-grid span {
+  min-height: 42px;
+  display: grid;
+  place-items: center;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: #334155;
+  background: var(--panel-2);
+  font-size: 0.84rem;
+  font-weight: 760;
+  text-align: center;
+}
+
 .compact-metrics {
   grid-template-columns: repeat(4, minmax(140px, 1fr));
 }
@@ -887,6 +917,7 @@ main {
   .role-picker,
   .account-status-grid,
   .action-grid,
+  .architecture-grid,
   .table-row {
     grid-template-columns: 1fr;
     width: 100%;

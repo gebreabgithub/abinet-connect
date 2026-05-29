@@ -46,8 +46,9 @@
                 <p class="eyebrow">Start with your goal</p>
                 <h2>Choose how you want to use the employment exchange.</h2>
                 <p>
-                  New visitors get a role-specific experience immediately. Employers see hiring tools,
-                  workers see job and verification tools, and brokers see placement operations.
+                  Abinet Connect is an international, role-based employment marketplace that connects
+                  employers, workers, and brokers through verified profiles, secure placement workflows,
+                  multilingual access, country-based administration, payments, compliance, and worker protection tools.
                 </p>
               </div>
               <div class="hero-metrics" id="heroMetrics"></div>
@@ -92,9 +93,27 @@
             <div id="adminPrivateArea" class="locked-area">
             <div class="role-banner">
               <p class="eyebrow">Admin workspace</p>
-              <h2>Verification, risk, reporting, and platform control.</h2>
+              <h2>International Multi-Country Employment Marketplace Architecture.</h2>
             </div>
             <div class="metric-grid compact-metrics" id="adminMetrics"></div>
+            <div class="panel">
+              <p class="eyebrow">Operating model</p>
+              <h2>Master Admin → Country Admin → Regional Manager → Support / Verification Team</h2>
+              <div class="architecture-grid">
+                <span>React / Next.js Web App</span>
+                <span>Mobile App</span>
+                <span>API Gateway</span>
+                <span>Backend Services</span>
+                <span>PostgreSQL</span>
+                <span>Redis</span>
+                <span>Object Storage</span>
+                <span>Email / SMS Service</span>
+                <span>Payment Service</span>
+                <span>Identity Verification Service</span>
+                <span>Monitoring</span>
+                <span>Audit Logs</span>
+              </div>
+            </div>
             <div class="section-grid">
               <div class="panel">
                 <div class="panel-header">
@@ -117,24 +136,32 @@
             </div>
             <form id="staffRegisterForm" class="panel form-panel master-only">
               <p class="eyebrow">Master admin only</p>
-              <h2>Create manager account</h2>
+              <h2>Create staff account</h2>
               <label>Name<input name="name" required placeholder="Admin full name" /></label>
               <label>Phone<input name="phone" required placeholder="+251911000000" /></label>
               <label>Staff role
                 <select name="role">
-                  <option>Manager</option>
                   <option>MasterAdmin</option>
+                  <option>CountryAdmin</option>
+                  <option>RegionalManager</option>
+                  <option>VerificationOfficer</option>
+                  <option>SupportAgent</option>
+                  <option>FinanceOfficer</option>
+                  <option>ComplianceOfficer</option>
+                  <option>Manager</option>
                 </select>
               </label>
               <label>Username<input name="username" required autocomplete="username" placeholder="new.admin" /></label>
               <label>Password<input name="password" required type="password" autocomplete="new-password" placeholder="Minimum 6 characters" /></label>
               <label>Address<input name="address" placeholder="Addis Ababa" /></label>
+              <label>Country<input name="country" placeholder="Ethiopia" /></label>
+              <label>Language<input name="language" placeholder="Amharic / English" /></label>
               <button type="submit">Create staff account</button>
             </form>
             <div class="panel manager-note master-only">
               <p class="eyebrow">Permission model</p>
-              <h2>Master Admin vs Manager</h2>
-              <p>Master Admin creates staff and controls system setup. Managers verify workers, add job categories, review risk, and support daily operations.</p>
+              <h2>International staff hierarchy</h2>
+              <p>Master Admin controls the global system. Country Admin manages one country. Regional Manager coordinates local teams. Verification, Support, Finance, and Compliance Officers operate their own queues.</p>
             </div>
             <form id="categoryForm" class="panel form-panel">
               <p class="eyebrow">Job categories</p>
@@ -171,6 +198,17 @@
                 <label>Category<select name="category" id="jobCategorySelect"></select></label>
                 <label>Skills<input name="skills" placeholder="Cleaning, cooking" /></label>
                 <label>Salary<input name="salary" placeholder="8,500 ETB/month" /></label>
+                <label>Currency
+                  <select name="currency">
+                    <option>ETB</option>
+                    <option>USD</option>
+                    <option>EUR</option>
+                    <option>GBP</option>
+                    <option>AED</option>
+                    <option>SAR</option>
+                    <option>KES</option>
+                  </select>
+                </label>
                 <button type="submit">Publish job</button>
               </form>
             </div>
@@ -223,15 +261,48 @@
                     <option>Worker</option>
                     <option>Employer</option>
                     <option>Broker</option>
-                    <option>Support</option>
+                  </select>
+                </label>
+                <label>Identity Document Type
+                  <select name="identityDocumentType" id="identityDocumentType">
+                    <option>National ID</option>
+                    <option>Passport</option>
+                    <option>Refugee ID</option>
+                    <option>Residence Permit</option>
+                    <option>Driver License</option>
+                    <option>Other Government ID</option>
                   </select>
                 </label>
                 <label>
-                  National ID (FAN)
-                  <input name="nationalId" id="nationalIdInput" placeholder="Required for employers, optional for workers" />
+                  Identity Document Number
+                  <input name="identityDocumentNumber" id="identityDocumentNumberInput" placeholder="Required for employers, optional for workers" />
                 </label>
-                <p id="nationalIdHint" class="field-hint">Required for Employer registration. Optional for Worker registration.</p>
+                <p id="identityDocumentHint" class="field-hint">Required for Employer registration. Optional for Worker registration.</p>
                 <label>Address<input name="address" placeholder="Bole, Addis Ababa" /></label>
+                <label>Country<input name="country" placeholder="Ethiopia" /></label>
+                <label>City<input name="city" placeholder="Addis Ababa" /></label>
+                <label>Language<input name="language" placeholder="Amharic / English" /></label>
+                <label>Currency
+                  <select name="currency">
+                    <option>ETB</option>
+                    <option>USD</option>
+                    <option>EUR</option>
+                    <option>GBP</option>
+                    <option>AED</option>
+                    <option>SAR</option>
+                    <option>KES</option>
+                  </select>
+                </label>
+                <label>Timezone<input name="timezone" placeholder="Africa/Addis_Ababa" /></label>
+                <label>Preferred contact method
+                  <select name="preferredContactMethod">
+                    <option>Phone</option>
+                    <option>SMS</option>
+                    <option>Email</option>
+                    <option>WhatsApp</option>
+                    <option>In-app notification</option>
+                  </select>
+                </label>
                 <label>Skills<input name="skills" placeholder="Cleaning, cooking, delivery" /></label>
                 <label>Availability<input name="availability" placeholder="Available now" /></label>
                 <button type="submit">Create profile</button>
@@ -253,6 +324,33 @@
                 <label>Broker<input name="broker" required placeholder="Agency or broker" /></label>
                 <label>Commission<input name="commission" placeholder="1,500 ETB" /></label>
                 <button type="submit">Create placement</button>
+              </form>
+              <form id="paymentForm" class="panel form-panel">
+                <p class="eyebrow">Finance</p>
+                <h2>Create payment record</h2>
+                <label>Payer<input name="payer" required placeholder="Employer, worker, or broker" /></label>
+                <label>Amount<input name="amount" required placeholder="1500" /></label>
+                <label>Currency
+                  <select name="currency">
+                    <option>ETB</option>
+                    <option>USD</option>
+                    <option>EUR</option>
+                    <option>GBP</option>
+                    <option>AED</option>
+                    <option>SAR</option>
+                    <option>KES</option>
+                  </select>
+                </label>
+                <label>Method
+                  <select name="method">
+                    <option>Local payment</option>
+                    <option>Bank transfer</option>
+                    <option>Mobile money</option>
+                    <option>Card payment</option>
+                    <option>Wallet balance</option>
+                  </select>
+                </label>
+                <button type="submit">Create invoice</button>
               </form>
               <div class="panel">
                 <div class="panel-header">
@@ -294,6 +392,42 @@
                   </select>
                 </label>
                 <button type="submit">Submit ticket</button>
+              </form>
+              <form id="complianceForm" class="panel form-panel">
+                <p class="eyebrow">Privacy and compliance</p>
+                <h2>Submit compliance request</h2>
+                <label>Requester<input name="requester" required placeholder="Name, phone, or account username" /></label>
+                <label>Request type
+                  <select name="requestType">
+                    <option>Privacy Policy Question</option>
+                    <option>Terms of Service Question</option>
+                    <option>Cookie Policy Question</option>
+                    <option>Data Deletion Request</option>
+                    <option>User Consent Request</option>
+                    <option>Report Abuse</option>
+                    <option>Account Deactivation</option>
+                  </select>
+                </label>
+                <label>Details<textarea name="details" rows="4" placeholder="Describe the request"></textarea></label>
+                <button type="submit">Submit compliance request</button>
+              </form>
+              <form id="safetyForm" class="panel form-panel">
+                <p class="eyebrow">Worker protection</p>
+                <h2>Submit safety report</h2>
+                <label>Reporter<input name="reporter" required placeholder="Worker name or phone" /></label>
+                <label>Report type
+                  <select name="reportType">
+                    <option>Emergency button</option>
+                    <option>Report employer</option>
+                    <option>Blacklist unsafe employer</option>
+                    <option>Safe workplace checklist</option>
+                    <option>Contract/agreement request</option>
+                    <option>Dispute resolution</option>
+                    <option>Insurance option</option>
+                  </select>
+                </label>
+                <label>Details<textarea name="details" rows="4" placeholder="Location, employer, and what happened"></textarea></label>
+                <button type="submit">Submit safety report</button>
               </form>
             </div>
           </section>

@@ -10,6 +10,9 @@ const state = {
   jobCategories: [],
   applications: [],
   notifications: [],
+  complianceRequests: [],
+  safetyReports: [],
+  payments: [],
   stats: {},
   selectedRole: "employer",
   adminToken: readStoredAdminToken(),
@@ -17,6 +20,17 @@ const state = {
   publicToken: readStoredPublicToken(),
   publicUser: readStoredPublicUser(),
 };
+
+const staffRoles = [
+  "MasterAdmin",
+  "CountryAdmin",
+  "RegionalManager",
+  "VerificationOfficer",
+  "SupportAgent",
+  "FinanceOfficer",
+  "ComplianceOfficer",
+  "Manager",
+];
 
 const metricLabels = [
   ["workers", "Workers"],
@@ -27,6 +41,7 @@ const metricLabels = [
   ["verificationRate", "Verification"],
   ["averageRating", "Avg rating"],
   ["fraudAlerts", "Risk alerts"],
+  ["payments", "Payments"],
 ];
 
 const heroMetrics = [
@@ -49,7 +64,7 @@ const roleExperiences = {
     eyebrow: "Employer experience",
     title: "Hire faster with verified worker discovery.",
     intro: "Designed for families, restaurants, offices, and companies that need trusted workers.",
-    actions: ["Post Jobs", "Find Workers", "Verified Workers"],
+    actions: ["Posted Jobs", "Applicants", "Shortlisted Workers", "Active Placements", "Payments", "Reviews", "Support Tickets"],
     statKeys: [["openJobs", "open jobs"], ["verifiedWorkers", "verified workers"], ["averageRating", "average rating"]],
     target: "employer",
     cta: "Open Employer Workspace",
@@ -58,7 +73,7 @@ const roleExperiences = {
     eyebrow: "Worker experience",
     title: "Find work and build a trusted profile.",
     intro: "Workers can track readiness, visibility, reputation, and verification from one place.",
-    actions: ["Available Jobs", "Complete Profile", "Verification Status"],
+    actions: ["Profile Completion", "Available Jobs", "Applications", "Verification Status", "Ratings", "Work History", "Earnings", "Safety Reports"],
     statKeys: [["openJobs", "available jobs"], ["verificationRate", "verification rate"], ["averageRating", "average rating"]],
     target: "employee",
     cta: "Open Worker Workspace",
@@ -67,7 +82,7 @@ const roleExperiences = {
     eyebrow: "Broker experience",
     title: "Manage placements, workers, and commissions.",
     intro: "Agencies and local brokers can coordinate assignments while keeping trust signals visible.",
-    actions: ["Register Workers", "Assign Placements", "Track Commissions"],
+    actions: ["Managed Workers", "Employer Requests", "Placements", "Commission", "Verification Status", "Performance Report"],
     statKeys: [["brokers", "broker partners"], ["activePlacements", "active placements"], ["workers", "worker profiles"]],
     target: "broker",
     cta: "Open Broker Workspace",
@@ -269,19 +284,19 @@ function renderCategoryOptions() {
   `).join("") || `<option>General</option>`;
 }
 
-function updateNationalIdRequirement() {
+function updateIdentityDocumentRequirement() {
   const roleSelect = qs("#registerForm select[name='role']");
-  const nationalId = qs("#nationalIdInput");
-  const hint = qs("#nationalIdHint");
-  if (!roleSelect || !nationalId || !hint) return;
+  const identityNumber = qs("#identityDocumentNumberInput");
+  const hint = qs("#identityDocumentHint");
+  if (!roleSelect || !identityNumber || !hint) return;
   const employer = roleSelect.value === "Employer";
-  nationalId.required = employer;
-  nationalId.placeholder = employer
-    ? "Required National ID / FAN"
-    : "Optional National ID / FAN";
+  identityNumber.required = employer;
+  identityNumber.placeholder = employer
+    ? "Required identity document number"
+    : "Optional identity document number";
   hint.textContent = employer
-    ? "National ID (FAN) is required for employer accounts."
-    : "National ID (FAN) is optional for workers and other public users.";
+    ? "Identity document number is required for employer accounts."
+    : "Identity document number is optional for workers and broker accounts.";
 }
 
 function renderRoleExperience() {
@@ -352,7 +367,7 @@ function jobCardHtml(job, signedInWorker) {
       </div>
       <div class="chips">${(job.skills || []).map((skill) => `<span>${escapeHtml(skill)}</span>`).join("")}</div>
       <footer>
-        <span>${escapeHtml(job.salary)}</span>
+        <span>${escapeHtml(job.salary)} ${escapeHtml(job.currency || "")}</span>
         <span class="badge">${escapeHtml(job.status)}</span>
         ${signedInWorker && job.status === "Open" ? `<button class="small-button" data-apply-job="${escapeHtml(job.id)}" type="button">Apply</button>` : ""}
       </footer>
@@ -467,14 +482,13 @@ function renderAudit() {
 function profileDetailsFor(user) {
   const worker = state.workers.find((item) => item.id === user.id || item.phone === user.phone);
   const roleActions = {
-    Employer: ["Post a job", "Review verified workers", "Track hiring requests"],
-    Worker: ["Review available jobs", "Complete profile", "Track verification"],
-    Broker: ["Assign placements", "Track commissions", "Register workers"],
-    Support: ["Open support ticket", "Review requests", "Escalate issues"],
+    Employer: ["Posted jobs", "Applicants", "Shortlisted workers", "Active placements", "Payments", "Reviews", "Support tickets"],
+    Worker: ["Profile completion", "Available jobs", "Applications", "Verification status", "Ratings", "Work history", "Earnings", "Safety reports"],
+    Broker: ["Managed workers", "Employer requests", "Placements", "Commission", "Verification status", "Performance report"],
   };
-  const fan = user.nationalIdStatus || worker?.nationalIdStatus || "Not provided";
-  const verification = worker?.verificationStatus || user.nationalIdStatus || "Account active";
-  return { worker, actions: roleActions[user.role] || ["Manage account"], fan, verification };
+  const identity = user.identityStatus || user.nationalIdStatus || worker?.identityStatus || worker?.nationalIdStatus || "Not provided";
+  const verification = worker?.verificationStatus || user.identityStatus || user.nationalIdStatus || "Account active";
+  return { worker, actions: roleActions[user.role] || ["Manage account"], identity, verification };
 }
 
 function renderAccountDashboard() {
@@ -498,11 +512,11 @@ function renderAccountDashboard() {
       <div>
         <p class="eyebrow">My profile</p>
         <h2>${escapeHtml(user.name)}</h2>
-        <p>${escapeHtml(user.role)} · ${escapeHtml(user.phone || "No phone")} · ${escapeHtml(user.address || user.city || "No address")}</p>
+        <p>${escapeHtml(user.role)} · ${escapeHtml(user.phone || "No phone")} · ${escapeHtml(user.city || "No city")}, ${escapeHtml(user.country || "No country")}</p>
       </div>
       <div class="account-status-grid">
         <article><strong>${escapeHtml(profile.verification)}</strong><span>Verification status</span></article>
-        <article><strong>${escapeHtml(profile.fan)}</strong><span>National ID (FAN)</span></article>
+        <article><strong>${escapeHtml(profile.identity)}</strong><span>Identity status</span></article>
         <article><strong>${escapeHtml(user.status || "Active")}</strong><span>Account status</span></article>
       </div>
     </div>
@@ -512,9 +526,20 @@ function renderAccountDashboard() {
         <h2>Update profile</h2>
         <label>Name<input name="name" value="${escapeHtml(user.name || "")}" /></label>
         <label>Address<input name="address" value="${escapeHtml(user.address || "")}" /></label>
+        <label>Country<input name="country" value="${escapeHtml(user.country || "")}" /></label>
+        <label>City<input name="city" value="${escapeHtml(user.city || "")}" /></label>
+        <label>Language<input name="language" value="${escapeHtml(user.language || "")}" /></label>
+        <label>Currency<input name="currency" value="${escapeHtml(user.currency || "")}" /></label>
+        <label>Timezone<input name="timezone" value="${escapeHtml(user.timezone || "")}" /></label>
+        <label>Preferred contact method<input name="preferredContactMethod" value="${escapeHtml(user.preferredContactMethod || "")}" /></label>
         <label>Skills<input name="skills" value="${escapeHtml((profile.worker?.skills || []).join(", "))}" placeholder="Cleaning, cooking, driving" /></label>
         <label>Availability<input name="availability" value="${escapeHtml(profile.worker?.availability || "")}" /></label>
-        <label>National ID (FAN)<input name="nationalId" value="${escapeHtml(user.nationalId || profile.worker?.nationalId || "")}" /></label>
+        <label>Identity document type
+          <select name="identityDocumentType">
+            ${["National ID", "Passport", "Refugee ID", "Residence Permit", "Driver License", "Other Government ID"].map((type) => `<option ${type === (user.identityDocumentType || profile.worker?.identityDocumentType) ? "selected" : ""}>${type}</option>`).join("")}
+          </select>
+        </label>
+        <label>Identity document number<input name="identityDocumentNumber" value="${escapeHtml(user.identityDocumentNumber || profile.worker?.identityDocumentNumber || user.nationalId || "")}" /></label>
         <button type="submit">Save profile</button>
       </form>
       <div class="panel">
@@ -575,9 +600,16 @@ function renderAccountDashboard() {
           body: JSON.stringify({
             name: form.get("name"),
             address: form.get("address"),
+            country: form.get("country"),
+            city: form.get("city"),
+            language: form.get("language"),
+            currency: form.get("currency"),
+            timezone: form.get("timezone"),
+            preferredContactMethod: form.get("preferredContactMethod"),
             skills: form.get("skills"),
             availability: form.get("availability"),
-            nationalId: form.get("nationalId"),
+            identityDocumentType: form.get("identityDocumentType"),
+            identityDocumentNumber: form.get("identityDocumentNumber"),
           }),
         });
         state.publicUser = updated;
@@ -608,9 +640,9 @@ function renderAccountDashboard() {
   document.querySelectorAll("[data-account-action]").forEach((button) => {
     button.addEventListener("click", () => {
       const label = button.dataset.accountAction;
-      if (label.includes("Post")) window.location.hash = "employer";
-      else if (label.includes("worker") || label.includes("profile") || label.includes("jobs")) window.location.hash = "employee";
-      else if (label.includes("placement") || label.includes("commission")) window.location.hash = "broker";
+      if (label.includes("Post") || label.includes("Applicant") || label.includes("Payment") || label.includes("Review")) window.location.hash = "employer";
+      else if (label.includes("worker") || label.includes("profile") || label.includes("jobs") || label.includes("Safety") || label.includes("Earnings")) window.location.hash = "employee";
+      else if (label.includes("placement") || label.includes("commission") || label.includes("Performance")) window.location.hash = "broker";
       else window.location.hash = "support";
       showPage();
     });
@@ -704,7 +736,7 @@ function wireForms() {
     state.publicToken = "";
     state.publicUser = null;
     removeStoredPublicSession();
-    renderAccountDashboard();
+    renderAll();
     toast("Signed out.");
   });
   window.addEventListener("hashchange", showPage);
@@ -739,8 +771,15 @@ function wireForms() {
           username: form.get("username"),
           password: form.get("password"),
           role: form.get("role"),
-          nationalId: form.get("nationalId"),
+          identityDocumentType: form.get("identityDocumentType"),
+          identityDocumentNumber: form.get("identityDocumentNumber"),
           address: form.get("address"),
+          country: form.get("country"),
+          city: form.get("city"),
+          language: form.get("language"),
+          currency: form.get("currency"),
+          timezone: form.get("timezone"),
+          preferredContactMethod: form.get("preferredContactMethod"),
           skills: splitList(form.get("skills") || ""),
           availability: form.get("availability"),
         }),
@@ -755,8 +794,8 @@ function wireForms() {
       toast(error.message, "error");
     }
   });
-  qs("#registerForm select[name='role']").addEventListener("change", updateNationalIdRequirement);
-  updateNationalIdRequirement();
+  qs("#registerForm select[name='role']").addEventListener("change", updateIdentityDocumentRequirement);
+  updateIdentityDocumentRequirement();
 
   qs("#jobForm").addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -771,6 +810,7 @@ function wireForms() {
         category: form.get("category"),
         skills: splitList(form.get("skills") || ""),
         salary: form.get("salary"),
+        currency: form.get("currency"),
       }),
     });
     formElement.reset();
@@ -811,6 +851,8 @@ function wireForms() {
           username: form.get("username"),
           password: form.get("password"),
           address: form.get("address"),
+          country: form.get("country"),
+          language: form.get("language"),
         }),
       });
       formElement.reset();
@@ -856,7 +898,7 @@ function wireForms() {
           password: form.get("password"),
         }),
       });
-      if (["MasterAdmin", "Manager"].includes(session.user.role)) {
+      if (staffRoles.includes(session.user.role)) {
         toast("Staff accounts must use the private staff portal.", "error");
         return;
       }
@@ -866,7 +908,7 @@ function wireForms() {
       formElement.reset();
       qs("#publicLoginForm").classList.add("hidden");
       await loadAccountData();
-      renderAccountDashboard();
+      renderAll();
       toast(`${session.user.role} signed in.`);
     } catch (error) {
       toast(error.message, "error");
@@ -887,6 +929,58 @@ function wireForms() {
     });
     formElement.reset();
     toast("Support ticket opened.");
+    await loadAll();
+  });
+
+  qs("#paymentForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
+    await request("/api/payments", {
+      method: "POST",
+      body: JSON.stringify({
+        payer: form.get("payer"),
+        amount: form.get("amount"),
+        currency: form.get("currency"),
+        method: form.get("method"),
+      }),
+    });
+    formElement.reset();
+    toast("Invoice created.");
+    await loadAll();
+  });
+
+  qs("#complianceForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
+    await request("/api/compliance/requests", {
+      method: "POST",
+      body: JSON.stringify({
+        requester: form.get("requester"),
+        requestType: form.get("requestType"),
+        details: form.get("details"),
+      }),
+    });
+    formElement.reset();
+    toast("Compliance request submitted.");
+    await loadAll();
+  });
+
+  qs("#safetyForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
+    await request("/api/safety/reports", {
+      method: "POST",
+      body: JSON.stringify({
+        reporter: form.get("reporter"),
+        reportType: form.get("reportType"),
+        details: form.get("details"),
+      }),
+    });
+    formElement.reset();
+    toast("Safety report submitted.");
     await loadAll();
   });
 
