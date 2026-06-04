@@ -8,7 +8,7 @@
     <title>Abinet Connect</title>
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/assets/icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/styles.css?v=20260604-adminlogout" />
+    <link rel="stylesheet" href="/styles.css?v=20260604-secureroles" />
   </head>
   <body>
     <div class="app-shell">
@@ -305,8 +305,18 @@
                 </label>
                 </div>
                 <div class="register-step hidden-step" data-register-step="4">
-                <label>Skills<input name="skills" placeholder="Cleaning, cooking, delivery" /></label>
-                <label>Availability<input name="availability" placeholder="Available now" /></label>
+                <label data-role-field="Worker">Skills<input name="skills" placeholder="Cleaning, cooking, delivery" /></label>
+                <label data-role-field="Worker">Experience<input name="experience" placeholder="3 years, beginner, certified" /></label>
+                <label data-role-field="Worker">Availability<input name="availability" placeholder="Available now" /></label>
+                <label data-role-field="Worker">Expected salary<input name="salaryExpectation" placeholder="Negotiable, 8,500 ETB/month" /></label>
+                <label data-role-field="Worker">Emergency contact<input name="emergencyContact" placeholder="+251911000000" /></label>
+                <label data-role-field="Employer">Employer type<input name="companyType" placeholder="Family, company, restaurant, agency" /></label>
+                <label data-role-field="Employer">Hiring needs<input name="employerNeeds" placeholder="Cleaner, driver, caregiver" /></label>
+                <label data-role-field="Employer">Payment method<input name="paymentPreference" placeholder="Bank transfer, mobile money, card" /></label>
+                <label data-role-field="Broker">Agency name<input name="agencyName" placeholder="Agency or broker name" /></label>
+                <label data-role-field="Broker">License / registration number<input name="licenseNumber" placeholder="Business registration number" /></label>
+                <label data-role-field="Broker">Coverage area<input name="coverageArea" placeholder="Addis Ababa, Ethiopia, GCC" /></label>
+                <label data-role-field="Broker">Commission terms<input name="commissionTerms" placeholder="10%, fixed fee, monthly" /></label>
                 </div>
                 <div class="step-controls">
                   <button id="registerPrev" class="secondary-button" type="button">Back</button>
@@ -474,6 +484,6 @@
     </div>
 
     <div id="toast" role="status" aria-live="polite"></div>
-    <script src="/app.js?v=20260604-adminlogout"></script>
+    <script src="/app.js?v=20260604-secureroles"></script>
   </body>
 </html>

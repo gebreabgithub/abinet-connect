@@ -16,6 +16,10 @@ An international, role-based employment marketplace that connects employers, wor
 - Staff-only job category management
 - Staff application queue with shortlist, accept, and reject actions
 - Multi-step public registration for employer, worker, and broker accounts
+- Role-specific registration details for workers, employers, and brokers
+- Signed-in ownership controls for employer jobs, broker placements, and payment records
+- Staff capability checks for verification, applications, category, finance, support, compliance, and staff management
+- Session expiry and basic login rate limiting
 - Username/password registration for new public users
 - Privacy, compliance, payment, and worker safety request forms
 - Support ticket creation
@@ -78,6 +82,21 @@ For a real Play Store APK later, wrap this web app with Capacitor or rebuild the
 ## Hosting
 
 Deployment templates and a VPS checklist are in `deploy/`.
+
+## Current security model
+
+This local prototype includes:
+
+- Password hashing
+- Separate public and staff sessions
+- Session expiry
+- Login attempt throttling
+- Hidden staff portal at `?staff=1#admin`
+- Backend staff capability checks
+- Employer ownership on job status changes
+- Worker ownership on applications and notifications
+
+Before real public launch, migrate the JSON data store to PostgreSQL, move sessions to Redis, add HTTPS, MFA for staff, password reset, email/SMS verification, encrypted secrets, backups, and production monitoring.
 
 ## Suggested production stack
 

@@ -173,6 +173,10 @@ function splitList(value) {
     .filter(Boolean);
 }
 
+function publicAuthHeaders() {
+  return state.publicToken ? { "X-Auth-Token": state.publicToken } : {};
+}
+
 function escapeHtml(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -335,6 +339,18 @@ function updateIdentityDocumentRequirement() {
   if (title) title.textContent = `Create ${roleLabel} account`;
   if (eyebrow) eyebrow.textContent = `${roleSelect.value} registration`;
   if (submit) submit.textContent = `Create ${roleLabel} account`;
+  updateRoleSpecificFields(roleSelect.value);
+}
+
+function updateRoleSpecificFields(role) {
+  document.querySelectorAll("[data-role-field]").forEach((field) => {
+    field.classList.toggle("hidden", field.dataset.roleField !== role);
+  });
+  const stepFour = qs('[data-step-pill="4"]');
+  if (!stepFour) return;
+  if (role === "Employer") stepFour.textContent = "Hiring details";
+  else if (role === "Broker") stepFour.textContent = "Agency details";
+  else stepFour.textContent = "Worker profile";
 }
 
 function updateRegisterStep() {
@@ -1024,7 +1040,17 @@ function wireForms() {
           timezone: form.get("timezone"),
           preferredContactMethod: form.get("preferredContactMethod"),
           skills: splitList(form.get("skills") || ""),
+          experience: form.get("experience"),
           availability: form.get("availability"),
+          salaryExpectation: form.get("salaryExpectation"),
+          emergencyContact: form.get("emergencyContact"),
+          companyType: form.get("companyType"),
+          employerNeeds: form.get("employerNeeds"),
+          paymentPreference: form.get("paymentPreference"),
+          agencyName: form.get("agencyName"),
+          licenseNumber: form.get("licenseNumber"),
+          coverageArea: form.get("coverageArea"),
+          commissionTerms: form.get("commissionTerms"),
         }),
       });
       const username = form.get("username");
@@ -1048,39 +1074,49 @@ function wireForms() {
     event.preventDefault();
     const formElement = event.currentTarget;
     const form = new FormData(formElement);
-    await request("/api/jobs", {
-      method: "POST",
-      body: JSON.stringify({
-        title: form.get("title"),
-        employer: form.get("employer"),
-        location: form.get("location"),
-        category: form.get("category"),
-        skills: splitList(form.get("skills") || ""),
-        salary: form.get("salary"),
-        currency: form.get("currency"),
-      }),
-    });
-    formElement.reset();
-    toast("Job published.");
-    await loadAll();
+    try {
+      await request("/api/jobs", {
+        method: "POST",
+        headers: publicAuthHeaders(),
+        body: JSON.stringify({
+          title: form.get("title"),
+          employer: form.get("employer"),
+          location: form.get("location"),
+          category: form.get("category"),
+          skills: splitList(form.get("skills") || ""),
+          salary: form.get("salary"),
+          currency: form.get("currency"),
+        }),
+      });
+      formElement.reset();
+      toast("Job published.");
+      await loadAll();
+    } catch (error) {
+      toast(error.message, "error");
+    }
   });
 
   qs("#placementForm").addEventListener("submit", async (event) => {
     event.preventDefault();
     const formElement = event.currentTarget;
     const form = new FormData(formElement);
-    await request("/api/placements", {
-      method: "POST",
-      body: JSON.stringify({
-        worker: form.get("worker"),
-        employer: form.get("employer"),
-        broker: form.get("broker"),
-        commission: form.get("commission"),
-      }),
-    });
-    formElement.reset();
-    toast("Placement created.");
-    await loadAll();
+    try {
+      await request("/api/placements", {
+        method: "POST",
+        headers: publicAuthHeaders(),
+        body: JSON.stringify({
+          worker: form.get("worker"),
+          employer: form.get("employer"),
+          broker: form.get("broker"),
+          commission: form.get("commission"),
+        }),
+      });
+      formElement.reset();
+      toast("Placement created.");
+      await loadAll();
+    } catch (error) {
+      toast(error.message, "error");
+    }
   });
 
   qs("#staffRegisterForm").addEventListener("submit", async (event) => {
@@ -1185,18 +1221,23 @@ function wireForms() {
     event.preventDefault();
     const formElement = event.currentTarget;
     const form = new FormData(formElement);
-    await request("/api/payments", {
-      method: "POST",
-      body: JSON.stringify({
-        payer: form.get("payer"),
-        amount: form.get("amount"),
-        currency: form.get("currency"),
-        method: form.get("method"),
-      }),
-    });
-    formElement.reset();
-    toast("Invoice created.");
-    await loadAll();
+    try {
+      await request("/api/payments", {
+        method: "POST",
+        headers: publicAuthHeaders(),
+        body: JSON.stringify({
+          payer: form.get("payer"),
+          amount: form.get("amount"),
+          currency: form.get("currency"),
+          method: form.get("method"),
+        }),
+      });
+      formElement.reset();
+      toast("Invoice created.");
+      await loadAll();
+    } catch (error) {
+      toast(error.message, "error");
+    }
   });
 
   qs("#complianceForm").addEventListener("submit", async (event) => {

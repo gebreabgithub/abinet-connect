@@ -37,6 +37,21 @@ IDENTITY_DOCUMENT_TYPES = {
     "Other Government ID",
 }
 SESSIONS = {}
+LOGIN_ATTEMPTS = {}
+SESSION_TTL_MS = int(os.environ.get("SESSION_TTL_MINUTES", "120")) * 60 * 1000
+MAX_LOGIN_ATTEMPTS = int(os.environ.get("MAX_LOGIN_ATTEMPTS", "8"))
+LOGIN_WINDOW_MS = int(os.environ.get("LOGIN_WINDOW_MINUTES", "15")) * 60 * 1000
+
+STAFF_CAPABILITIES = {
+    "MasterAdmin": {"staff", "category", "verification", "applications", "support", "finance", "compliance", "audit", "settings"},
+    "CountryAdmin": {"staff", "category", "verification", "applications", "support", "finance", "compliance", "audit"},
+    "RegionalManager": {"verification", "applications", "support", "audit"},
+    "VerificationOfficer": {"verification", "applications"},
+    "SupportAgent": {"support", "applications"},
+    "FinanceOfficer": {"finance", "applications"},
+    "ComplianceOfficer": {"compliance", "audit"},
+    "Manager": {"verification", "applications", "support", "category", "audit"},
+}
 
 
 class Store:
@@ -104,6 +119,12 @@ def public_user(user):
     safe.pop("username", None)
     safe.pop("passwordHash", None)
     return safe
+
+
+def session_user(session):
+    if isinstance(session, dict) and "user" in session:
+        return session.get("user")
+    return session
 
 
 def public_bootstrap(data):
@@ -227,6 +248,7 @@ class BrokerHandler(BaseHTTPRequestHandler):
             if route == "/api/bootstrap":
                 return self.json(public_bootstrap(store.read()))
             if route == "/api/admin/stats":
+                self.require_staff()
                 return self.json(build_stats(store.read()))
             if route == "/api/users":
                 return self.json(self.filter_users(query))
@@ -247,14 +269,24 @@ class BrokerHandler(BaseHTTPRequestHandler):
             if route == "/api/brokers":
                 return self.json(store.read().get("brokers", []))
             if route == "/api/support/tickets":
+                user = self.optional_session()
+                if user and user.get("role") in STAFF_ROLES:
+                    self.require_staff_capability("support")
                 return self.json(store.read().get("supportTickets", []))
             if route == "/api/compliance/requests":
+                user = self.optional_session()
+                if user and user.get("role") in STAFF_ROLES:
+                    self.require_staff_capability("compliance")
                 return self.json(store.read().get("complianceRequests", []))
             if route == "/api/safety/reports":
                 return self.json(store.read().get("safetyReports", []))
             if route == "/api/payments":
+                user = self.require_session()
+                if user.get("role") in STAFF_ROLES:
+                    self.require_staff_capability("finance")
                 return self.json(store.read().get("payments", []))
             if route == "/api/admin/verification-queue":
+                self.require_staff_capability("verification")
                 workers = [worker for worker in store.read().get("workers", []) if not worker.get("verified")]
                 return self.json(workers)
 
@@ -273,7 +305,7 @@ class BrokerHandler(BaseHTTPRequestHandler):
             if route == "/api/auth/login":
                 return self.json(self.login(body))
             if route == "/api/staff/register":
-                self.require_master()
+                self.require_staff_capability("staff")
                 return self.json(self.register_staff(body), 201)
             if route == "/api/jobs":
                 return self.json(self.create_job(body), 201)
@@ -281,7 +313,7 @@ class BrokerHandler(BaseHTTPRequestHandler):
                 user = self.require_session()
                 return self.json(self.create_application(user, body), 201)
             if route == "/api/job-categories":
-                self.require_staff()
+                self.require_staff_capability("category")
                 return self.json(self.create_category(body), 201)
             if route == "/api/placements":
                 return self.json(self.create_placement(body), 201)
@@ -305,12 +337,12 @@ class BrokerHandler(BaseHTTPRequestHandler):
             body = self.body()
             parts = [part for part in route.split("/") if part]
             if len(parts) == 4 and parts[:2] == ["api", "workers"] and parts[3] == "verify":
-                self.require_staff()
+                self.require_staff_capability("verification")
                 return self.json(self.verify_worker(parts[2], body))
             if len(parts) == 4 and parts[:2] == ["api", "jobs"] and parts[3] == "status":
                 return self.json(self.update_job_status(parts[2], body))
             if len(parts) == 4 and parts[:2] == ["api", "applications"] and parts[3] == "status":
-                self.require_staff()
+                self.require_staff_capability("applications")
                 return self.json(self.update_application_status(parts[2], body))
             if len(parts) == 4 and parts[:2] == ["api", "notifications"] and parts[3] == "read":
                 user = self.require_session()
@@ -371,9 +403,13 @@ class BrokerHandler(BaseHTTPRequestHandler):
 
     def require_session(self):
         token = self.headers.get("X-Admin-Token", "") or self.headers.get("X-Auth-Token", "")
-        user = SESSIONS.get(token)
+        session = SESSIONS.get(token)
+        user = session_user(session)
         if not user:
             raise ApiError("Login required", 401)
+        if isinstance(session, dict) and session.get("expiresAt", 0) < now_ms():
+            SESSIONS.pop(token, None)
+            raise ApiError("Session expired. Please sign in again.", 401)
         return user
 
     def require_staff(self):
@@ -382,22 +418,54 @@ class BrokerHandler(BaseHTTPRequestHandler):
             raise ApiError("Staff login required", 403)
         return user
 
+    def require_staff_capability(self, capability):
+        user = self.require_staff()
+        allowed = STAFF_CAPABILITIES.get(user.get("role"), set())
+        if capability not in allowed:
+            raise ApiError(f"{user.get('role')} cannot access {capability}", 403)
+        return user
+
     def require_master(self):
         user = self.require_session()
         if user.get("role") not in {"MasterAdmin", "CountryAdmin"}:
             raise ApiError("Master admin or country admin access required", 403)
         return user
 
+    def optional_session(self):
+        token = self.headers.get("X-Admin-Token", "") or self.headers.get("X-Auth-Token", "")
+        session = SESSIONS.get(token)
+        if not session:
+            return None
+        if isinstance(session, dict) and session.get("expiresAt", 0) < now_ms():
+            SESSIONS.pop(token, None)
+            return None
+        return session_user(session)
+
     def login(self, body):
         username = str(body.get("username", "")).strip().lower()
         password = str(body.get("password", ""))
+        self.check_login_rate(username)
         for user in store.read().get("users", []):
             if str(user.get("username", "")).lower() == username:
                 if user.get("passwordHash") == hash_password(password):
                     token = make_id("session")
-                    SESSIONS[token] = user
-                    return {"token": token, "user": public_user(user)}
+                    SESSIONS[token] = {"user": user, "createdAt": now_ms(), "expiresAt": now_ms() + SESSION_TTL_MS}
+                    LOGIN_ATTEMPTS.pop(username, None)
+                    return {"token": token, "user": public_user(user), "expiresAt": SESSIONS[token]["expiresAt"]}
+        self.record_login_failure(username)
         raise ApiError("Invalid username or password", 401)
+
+    def check_login_rate(self, username):
+        if not username:
+            return
+        attempts = [item for item in LOGIN_ATTEMPTS.get(username, []) if now_ms() - item < LOGIN_WINDOW_MS]
+        LOGIN_ATTEMPTS[username] = attempts
+        if len(attempts) >= MAX_LOGIN_ATTEMPTS:
+            raise ApiError("Too many sign-in attempts. Please wait and try again.", 429)
+
+    def record_login_failure(self, username):
+        if username:
+            LOGIN_ATTEMPTS.setdefault(username, []).append(now_ms())
 
     def filter_workers(self, query):
         skill = query.get("skill", [""])[0]
@@ -502,6 +570,13 @@ class BrokerHandler(BaseHTTPRequestHandler):
                 "currency": str(body.get("currency", "ETB")).strip() or "ETB",
                 "timezone": str(body.get("timezone", "Africa/Addis_Ababa")).strip() or "Africa/Addis_Ababa",
                 "preferredContactMethod": str(body.get("preferredContactMethod", "Phone")).strip() or "Phone",
+                "companyType": str(body.get("companyType", "")).strip(),
+                "employerNeeds": parse_list(body.get("employerNeeds")),
+                "paymentPreference": str(body.get("paymentPreference", "")).strip(),
+                "agencyName": str(body.get("agencyName", "")).strip(),
+                "licenseNumber": str(body.get("licenseNumber", "")).strip(),
+                "coverageArea": str(body.get("coverageArea", "")).strip(),
+                "commissionTerms": str(body.get("commissionTerms", "")).strip(),
                 "status": "Active",
                 "createdAt": now_ms(),
             }
@@ -538,6 +613,20 @@ class BrokerHandler(BaseHTTPRequestHandler):
                     "createdAt": user["createdAt"],
                 }
                 data.setdefault("workers", []).append(worker)
+
+            if role == "Broker":
+                data.setdefault("brokers", []).append({
+                    "id": user["id"],
+                    "name": user["agencyName"] or name,
+                    "coverage": user["coverageArea"] or user["city"],
+                    "managedWorkers": 0,
+                    "monthlyPlacements": 0,
+                    "commissionRate": user["commissionTerms"] or "Negotiable",
+                    "licenseNumber": user["licenseNumber"],
+                    "country": user["country"],
+                    "city": user["city"],
+                    "createdAt": user["createdAt"],
+                })
 
             audit(data, "System", "registered user", f"{name} ({role})")
             return public_user(user)
@@ -609,8 +698,11 @@ class BrokerHandler(BaseHTTPRequestHandler):
         return store.update(mutate)
 
     def create_job(self, body):
+        user = self.require_session()
+        if user.get("role") not in {"Employer"} | STAFF_ROLES:
+            raise ApiError("Only employer or staff accounts can post jobs", 403)
         title = str(body.get("title", "")).strip()
-        employer = str(body.get("employer", "")).strip()
+        employer = str(body.get("employer", "")).strip() or user.get("name", "")
         location = str(body.get("location", "")).strip()
         category = str(body.get("category", "General")).strip() or "General"
         if not title or not employer or not location:
@@ -621,6 +713,7 @@ class BrokerHandler(BaseHTTPRequestHandler):
                 "id": make_id("job"),
                 "title": title,
                 "employer": employer,
+                "employerId": user.get("id", "") if user.get("role") == "Employer" else str(body.get("employerId", "")).strip(),
                 "location": location,
                 "category": category,
                 "skills": parse_list(body.get("skills")),
@@ -675,9 +768,14 @@ class BrokerHandler(BaseHTTPRequestHandler):
         return store.update(mutate)
 
     def create_placement(self, body):
+        user = self.require_session()
+        if user.get("role") in STAFF_ROLES:
+            self.require_staff_capability("applications")
+        elif user.get("role") != "Broker":
+            raise ApiError("Only broker or staff accounts can create placements", 403)
         worker = str(body.get("worker", "")).strip()
         employer = str(body.get("employer", "")).strip()
-        broker = str(body.get("broker", "")).strip()
+        broker = str(body.get("broker", "")).strip() or user.get("name", "")
         if not worker or not employer or not broker:
             raise ApiError("Worker, employer, and broker are required", 400)
 
@@ -687,6 +785,7 @@ class BrokerHandler(BaseHTTPRequestHandler):
                 "worker": worker,
                 "employer": employer,
                 "broker": broker,
+                "brokerId": user.get("id", "") if user.get("role") == "Broker" else str(body.get("brokerId", "")).strip(),
                 "commission": str(body.get("commission", "0 ETB")).strip() or "0 ETB",
                 "status": str(body.get("status", "Scheduled")).strip() or "Scheduled",
                 "startDate": str(body.get("startDate", "")).strip(),
@@ -764,6 +863,11 @@ class BrokerHandler(BaseHTTPRequestHandler):
         return store.update(mutate)
 
     def create_payment(self, body):
+        user = self.require_session()
+        if user.get("role") in STAFF_ROLES:
+            self.require_staff_capability("finance")
+        elif user.get("role") not in {"Employer", "Broker"}:
+            raise ApiError("Only employer, broker, or finance staff accounts can create payment records", 403)
         payer = str(body.get("payer", "")).strip()
         amount = str(body.get("amount", "")).strip()
         method = str(body.get("method", "")).strip()
@@ -775,6 +879,7 @@ class BrokerHandler(BaseHTTPRequestHandler):
             item = {
                 "id": make_id("pay"),
                 "payer": payer,
+                "payerId": user.get("id", ""),
                 "amount": amount,
                 "currency": currency,
                 "method": method,
@@ -796,7 +901,9 @@ class BrokerHandler(BaseHTTPRequestHandler):
             "name", "address", "city", "country", "language", "currency", "timezone",
             "preferredContactMethod", "availability", "skills", "salaryExpectation",
             "experience", "emergencyContact", "identityDocumentType",
-            "identityDocumentNumber", "nationalId",
+            "identityDocumentNumber", "nationalId", "companyType", "employerNeeds",
+            "paymentPreference", "agencyName", "licenseNumber", "coverageArea",
+            "commissionTerms",
         }
 
         def mutate(data):
@@ -885,6 +992,7 @@ class BrokerHandler(BaseHTTPRequestHandler):
         return store.update(mutate)
 
     def update_job_status(self, job_id, body):
+        user = self.require_session()
         status = str(body.get("status", "")).strip()
         if status not in {"Open", "Matched", "Closed", "Cancelled"}:
             raise ApiError("Invalid job status", 400)
@@ -892,6 +1000,10 @@ class BrokerHandler(BaseHTTPRequestHandler):
         def mutate(data):
             for job in data.get("jobs", []):
                 if job.get("id") == job_id:
+                    if user.get("role") in STAFF_ROLES:
+                        self.require_staff_capability("applications")
+                    elif job.get("employerId") != user.get("id"):
+                        raise ApiError("You can only update your own jobs", 403)
                     job["status"] = status
                     audit(data, "Employer Desk", "updated job status", job.get("title", job_id))
                     return copy.deepcopy(job)
