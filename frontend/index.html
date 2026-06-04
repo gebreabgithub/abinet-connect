@@ -8,7 +8,7 @@
     <title>Abinet Connect</title>
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/assets/icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/styles.css?v=20260604-adminstats" />
+    <link rel="stylesheet" href="/styles.css?v=20260604-adminrecords" />
   </head>
   <body>
     <div class="app-shell">
@@ -110,6 +110,7 @@
             </div>
             <div class="admin-tabs" role="tablist" aria-label="Admin sections">
               <button class="active" type="button" data-admin-tab="overview">Overview</button>
+              <button type="button" data-admin-tab="records">Records</button>
               <button type="button" data-admin-tab="applications">Applications</button>
               <button type="button" data-admin-tab="verifications">Verifications</button>
               <button type="button" data-admin-tab="users">Users & staff</button>
@@ -118,6 +119,58 @@
             <div data-admin-panel="overview">
             <div class="metric-grid compact-metrics" id="adminMetrics"></div>
             <div id="adminOpsDashboard" class="dashboard-grid" aria-label="Admin operations dashboard"></div>
+            </div>
+            <div class="admin-records" data-admin-panel="records">
+              <div class="panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Worker records</p>
+                    <h2>Workers list</h2>
+                  </div>
+                  <span class="quiet-badge" id="adminWorkersCount">0 workers</span>
+                </div>
+                <div id="adminWorkersList" class="stack-list"></div>
+              </div>
+              <div class="panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Job records</p>
+                    <h2>Open jobs list</h2>
+                  </div>
+                  <span class="quiet-badge" id="adminJobsCount">0 open</span>
+                </div>
+                <div id="adminJobsList" class="stack-list"></div>
+              </div>
+              <div class="panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Account records</p>
+                    <h2>Users and roles</h2>
+                  </div>
+                  <span class="quiet-badge" id="adminUsersCount">0 users</span>
+                </div>
+                <div id="adminUsersList" class="stack-list"></div>
+              </div>
+              <div class="panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Finance records</p>
+                    <h2>Payments</h2>
+                  </div>
+                  <span class="quiet-badge" id="adminPaymentsCount">0 payments</span>
+                </div>
+                <div id="adminPaymentsList" class="stack-list"></div>
+              </div>
+              <div class="panel wide-panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Risk and support</p>
+                    <h2>Reports and requests</h2>
+                  </div>
+                  <span class="quiet-badge" id="adminReportsCount">0 reports</span>
+                </div>
+                <div id="adminReportsList" class="stack-list"></div>
+              </div>
             </div>
             <div class="panel admin-note-panel" data-admin-panel="settings">
               <p class="eyebrow">Operating model</p>
@@ -501,6 +554,6 @@
     </div>
 
     <div id="toast" role="status" aria-live="polite"></div>
-    <script src="/app.js?v=20260604-adminstats"></script>
+    <script src="/app.js?v=20260604-adminrecords"></script>
   </body>
 </html>

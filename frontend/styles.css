@@ -780,6 +780,31 @@ main {
   box-shadow: none;
 }
 
+.admin-records {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.admin-records .wide-panel {
+  grid-column: 1 / -1;
+}
+
+.admin-records .stack-list {
+  max-height: 520px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.staff-quick-stats article {
+  cursor: pointer;
+}
+
+.staff-quick-stats article:hover {
+  border-color: var(--brand-2);
+  background: #ecfdf5;
+}
+
 .step-indicator {
   grid-column: 1 / -1;
   display: grid;
@@ -1253,6 +1278,10 @@ main {
 
   .admin-tabs {
     display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .admin-records {
     grid-template-columns: 1fr;
   }
 

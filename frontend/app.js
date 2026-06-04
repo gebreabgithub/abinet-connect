@@ -304,7 +304,7 @@ function renderMetrics() {
       ["applications", "Applications"],
       ["users", "Users"],
     ].map(([key, label]) => `
-      <article>
+      <article data-admin-record-jump="${key === "applications" ? "applications" : "records"}">
         <strong>${formatMetric(key, state.stats[key])}</strong>
         <span>${label}</span>
       </article>
@@ -681,6 +681,91 @@ function dashboardCard(title, value, detail, action = "") {
   `;
 }
 
+function adminRecordButton(label) {
+  return `<button class="small-button" type="button" data-admin-record-jump="records">${escapeHtml(label)}</button>`;
+}
+
+function renderAdminRecords() {
+  const openJobs = state.jobs.filter((job) => job.status === "Open");
+  const reports = [
+    ...(state.safetyReports || []).map((item) => ({ title: item.reportType, owner: item.reporter, status: item.status, type: "Safety" })),
+    ...(state.complianceRequests || []).map((item) => ({ title: item.requestType, owner: item.requester, status: item.status, type: "Compliance" })),
+    ...(state.supportTickets || []).map((item) => ({ title: item.topic, owner: item.requester, status: item.status, type: "Support" })),
+  ];
+
+  qs("#adminWorkersCount").textContent = `${state.workers.length} workers`;
+  qs("#adminJobsCount").textContent = `${openJobs.length} open`;
+  qs("#adminUsersCount").textContent = `${state.users.length} users`;
+  qs("#adminPaymentsCount").textContent = `${state.payments.length} payments`;
+  qs("#adminReportsCount").textContent = `${reports.length} reports`;
+
+  qs("#adminWorkersList").innerHTML = state.workers.map((worker) => `
+    <article class="record">
+      <div>
+        <strong>${escapeHtml(worker.name)}</strong>
+        <span>${escapeHtml(worker.location || worker.city || "No location")} · ${escapeHtml(worker.phone || "No phone")}</span>
+      </div>
+      <div class="chips">${(worker.skills || []).slice(0, 3).map((skill) => `<span>${escapeHtml(skill)}</span>`).join("")}</div>
+      <footer>
+        <span>${escapeHtml(worker.availability || "Pending")}</span>
+        <span class="badge ${worker.verified ? "good" : "warn"}">${worker.verified ? "Verified" : "Pending"}</span>
+      </footer>
+    </article>
+  `).join("") || `<div class="empty-state">No workers yet.</div>`;
+
+  qs("#adminJobsList").innerHTML = openJobs.map((job) => `
+    <article class="record">
+      <div>
+        <strong>${escapeHtml(job.title)}</strong>
+        <span>${escapeHtml(job.employer)} · ${escapeHtml(job.location)} · ${escapeHtml(job.category || "General")}</span>
+      </div>
+      <footer>
+        <span>${escapeHtml(job.salary || "Negotiable")} ${escapeHtml(job.currency || "")}</span>
+        <span class="badge good">${escapeHtml(job.status)}</span>
+      </footer>
+    </article>
+  `).join("") || `<div class="empty-state">No open jobs.</div>`;
+
+  qs("#adminUsersList").innerHTML = state.users.map((user) => `
+    <article class="record">
+      <div>
+        <strong>${escapeHtml(user.name)}</strong>
+        <span>${escapeHtml(user.phone || "No phone")} · ${escapeHtml(user.city || "No city")}, ${escapeHtml(user.country || "No country")}</span>
+      </div>
+      <footer>
+        <span>${escapeHtml(user.status || "Active")}</span>
+        <span class="badge">${escapeHtml(user.role)}</span>
+      </footer>
+    </article>
+  `).join("") || `<div class="empty-state">No users yet.</div>`;
+
+  qs("#adminPaymentsList").innerHTML = state.payments.map((payment) => `
+    <article class="record">
+      <div>
+        <strong>${escapeHtml(payment.invoiceNumber || payment.id)}</strong>
+        <span>${escapeHtml(payment.payer)} · ${escapeHtml(payment.method)}</span>
+      </div>
+      <footer>
+        <span>${escapeHtml(payment.amount)} ${escapeHtml(payment.currency || "")}</span>
+        <span class="badge warn">${escapeHtml(payment.status || "Pending")}</span>
+      </footer>
+    </article>
+  `).join("") || `<div class="empty-state">No payment records yet.</div>`;
+
+  qs("#adminReportsList").innerHTML = reports.map((report) => `
+    <article class="record">
+      <div>
+        <strong>${escapeHtml(report.title)}</strong>
+        <span>${escapeHtml(report.type)} · ${escapeHtml(report.owner || "Unknown requester")}</span>
+      </div>
+      <footer>
+        <span>${escapeHtml(report.type)}</span>
+        <span class="badge ${report.status === "Open" || report.status === "Reviewing" ? "warn" : ""}">${escapeHtml(report.status || "Open")}</span>
+      </footer>
+    </article>
+  `).join("") || `<div class="empty-state">No reports or requests yet.</div>`;
+}
+
 function renderRoleDashboards() {
   const openJobs = state.jobs.filter((job) => job.status === "Open");
   const applicationPool = state.staffApplications.length ? state.staffApplications : state.applications;
@@ -717,15 +802,15 @@ function renderRoleDashboards() {
   ].join("");
 
   qs("#adminOpsDashboard").innerHTML = [
-    dashboardCard("Workers", state.workers.length, "Total worker profiles in the marketplace."),
-    dashboardCard("Open jobs", openJobs.length, "Employer demand currently accepting applicants."),
-    dashboardCard("Applications", state.stats.applications || applicationPool.length, "All submitted worker applications visible to staff."),
-    dashboardCard("Users", state.users.length, "Employers, workers, brokers, and staff identities."),
+    dashboardCard("Workers", state.workers.length, "Total worker profiles in the marketplace.", adminRecordButton("View workers")),
+    dashboardCard("Open jobs", openJobs.length, "Employer demand currently accepting applicants.", adminRecordButton("View jobs")),
+    dashboardCard("Applications", state.stats.applications || applicationPool.length, "All submitted worker applications visible to staff.", `<button class="small-button" type="button" data-admin-record-jump="applications">View applications</button>`),
+    dashboardCard("Users", state.users.length, "Employers, workers, brokers, and staff identities.", adminRecordButton("View users")),
     dashboardCard("Categories", state.jobCategories.length, "Job categories managed by staff.", `<button class="small-button" type="button" data-scroll-target="categoryForm">Add category</button>`),
     dashboardCard("Verifications", pendingWorkers.length, "Workers waiting for staff verification."),
     dashboardCard("Fraud alerts", state.fraudAlerts.length, "Risk signals and suspicious account activity."),
-    dashboardCard("Payments", state.payments.length, "Finance records and invoice activity."),
-    dashboardCard("Reports", safetyReports.length + complianceRequests.length, "Safety and compliance reports requiring review."),
+    dashboardCard("Payments", state.payments.length, "Finance records and invoice activity.", adminRecordButton("View payments")),
+    dashboardCard("Reports", safetyReports.length + complianceRequests.length, "Safety and compliance reports requiring review.", adminRecordButton("View reports")),
     dashboardCard("Audit logs", state.auditLog.length, "Recent staff and system actions."),
   ].join("");
 
@@ -739,6 +824,14 @@ function renderRoleDashboards() {
   document.querySelectorAll("[data-scroll-target]").forEach((button) => {
     button.addEventListener("click", () => {
       qs(`#${button.dataset.scrollTarget}`)?.scrollIntoView({ block: "start", behavior: "smooth" });
+    });
+  });
+
+  document.querySelectorAll("[data-admin-record-jump], [data-admin-record-shortcut]").forEach((element) => {
+    element.addEventListener("click", () => {
+      state.adminTab = element.dataset.adminRecordJump || "records";
+      updateAdminTabs();
+      qs(`[data-admin-panel="${state.adminTab}"]`)?.scrollIntoView({ block: "start", behavior: "smooth" });
     });
   });
 }
@@ -956,6 +1049,7 @@ function renderAll() {
   renderApplicationQueue();
   renderTickets();
   renderAudit();
+  renderAdminRecords();
   renderRoleDashboards();
 }
 
