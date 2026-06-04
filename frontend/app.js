@@ -333,9 +333,6 @@ function updateIdentityDocumentRequirement() {
   if (title) title.textContent = `Create ${roleLabel} account`;
   if (eyebrow) eyebrow.textContent = `${roleSelect.value} registration`;
   if (submit) submit.textContent = `Create ${roleLabel} account`;
-  document.querySelectorAll("[data-register-role]").forEach((button) => {
-    button.classList.toggle("selected", button.dataset.registerRole === roleSelect.value);
-  });
 }
 
 function updateRegisterStep() {
@@ -973,12 +970,6 @@ function wireForms() {
     card.addEventListener("click", () => {
       state.selectedRole = card.dataset.roleChoice;
       renderRoleExperience();
-    });
-  });
-
-  document.querySelectorAll("[data-register-role]").forEach((button) => {
-    button.addEventListener("click", () => {
-      openRegistration(button.dataset.registerRole);
     });
   });
 

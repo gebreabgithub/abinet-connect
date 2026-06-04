@@ -670,10 +670,13 @@ main {
   place-items: center;
   border: 1px solid var(--line);
   border-radius: 8px;
+  padding: 6px 8px;
   color: var(--muted);
   background: var(--panel-2);
   font-size: 0.78rem;
   font-weight: 850;
+  line-height: 1.2;
+  text-align: center;
 }
 
 .step-indicator span.active {
@@ -686,23 +689,6 @@ main {
   color: var(--brand);
   border-color: #bbf7d0;
   background: #dcfce7;
-}
-
-.register-role-actions {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.register-role-actions button {
-  min-height: 44px;
-  color: var(--ink);
-  background: #e2e8f0;
-}
-
-.register-role-actions button.selected {
-  color: #fff;
-  background: var(--brand);
 }
 
 .architecture-grid {
@@ -780,7 +766,6 @@ main {
 #employee #registerForm .eyebrow,
 #employee #registerForm h2,
 #employee #registerForm .form-intro,
-#employee #registerForm .register-role-actions,
 #employee #registerForm .field-hint,
 #employee #registerForm .step-controls {
   grid-column: 1 / -1;
@@ -797,7 +782,6 @@ main {
   gap: 14px;
 }
 
-.register-step .register-role-actions,
 .register-step .field-hint {
   grid-column: 1 / -1;
 }
@@ -1102,7 +1086,6 @@ main {
   .account-status-grid,
   .action-grid,
   .step-indicator,
-  .register-role-actions,
   .architecture-grid,
   .table-row {
     grid-template-columns: 1fr;
