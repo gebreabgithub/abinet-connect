@@ -21,6 +21,7 @@ const state = {
   publicToken: readStoredPublicToken(),
   publicUser: readStoredPublicUser(),
   registerStep: 1,
+  adminTab: "overview",
 };
 
 const staffRoles = [
@@ -326,6 +327,9 @@ function updateIdentityDocumentRequirement() {
   const title = qs("#registerTitle");
   const eyebrow = qs("#registerEyebrow");
   const submit = qs("#registerSubmit");
+  const nameLabel = qs("#registerNameLabelText");
+  const nameInput = qs("#registerNameInput");
+  const intro = qs("#registerIntro");
   if (!roleSelect || !identityNumber || !hint) return;
   const employer = roleSelect.value === "Employer";
   const roleLabel = roleSelect.value === "Broker" ? "broker / agency" : roleSelect.value.toLowerCase();
@@ -339,6 +343,27 @@ function updateIdentityDocumentRequirement() {
   if (title) title.textContent = `Create ${roleLabel} account`;
   if (eyebrow) eyebrow.textContent = `${roleSelect.value} registration`;
   if (submit) submit.textContent = `Create ${roleLabel} account`;
+  if (nameLabel) {
+    nameLabel.textContent = roleSelect.value === "Employer"
+      ? "Organization / employer name"
+      : roleSelect.value === "Broker"
+        ? "Agency or broker name"
+        : "Full legal name";
+  }
+  if (nameInput) {
+    nameInput.placeholder = roleSelect.value === "Employer"
+      ? "Company, family, or organization name"
+      : roleSelect.value === "Broker"
+        ? "Licensed agency or broker name"
+        : "Worker full legal name";
+  }
+  if (intro) {
+    intro.textContent = roleSelect.value === "Employer"
+      ? "Create an employer account to post jobs, review applicants, and manage placements."
+      : roleSelect.value === "Broker"
+        ? "Create a broker or agency account to manage workers, placements, and commission records."
+        : "Create a worker account to apply for jobs, complete verification, and manage your profile.";
+  }
   updateRoleSpecificFields(roleSelect.value);
 }
 
@@ -940,9 +965,35 @@ function updateAdminGate() {
   if (!privateArea || !loginForm) return;
   privateArea.classList.toggle("locked-area", !state.adminToken);
   loginForm.classList.toggle("hidden", Boolean(state.adminToken));
+  const identity = qs("#staffIdentity");
+  const sessionInfo = qs("#staffSessionInfo");
+  if (identity) identity.textContent = state.currentUser ? `${state.currentUser.name} · ${state.currentUser.role}` : "Signed in";
+  if (sessionInfo) sessionInfo.textContent = state.currentUser ? `${state.currentUser.country || "Global"} staff access` : "Secure staff session";
   const capabilities = new Set(staffCapabilities[state.currentUser?.role] || []);
   document.querySelectorAll("[data-staff-tool]").forEach((element) => {
     element.classList.toggle("locked-area", !capabilities.has(element.dataset.staffTool));
+  });
+  updateAdminTabs();
+}
+
+function updateAdminTabs() {
+  const tabs = [...document.querySelectorAll("[data-admin-tab]")];
+  const panels = [...document.querySelectorAll("[data-admin-panel]")];
+  if (!tabs.length || !panels.length) return;
+  const visibleTabs = tabs.filter((tab) => {
+    const target = tab.dataset.adminTab;
+    const matchingPanels = panels.filter((panel) => panel.dataset.adminPanel === target);
+    const hasVisiblePanel = matchingPanels.some((panel) => !panel.classList.contains("locked-area"));
+    tab.classList.toggle("locked-area", !hasVisiblePanel);
+    return hasVisiblePanel;
+  });
+  if (!visibleTabs.some((tab) => tab.dataset.adminTab === state.adminTab)) {
+    state.adminTab = visibleTabs[0]?.dataset.adminTab || "overview";
+  }
+  tabs.forEach((tab) => tab.classList.toggle("active", tab.dataset.adminTab === state.adminTab));
+  panels.forEach((panel) => {
+    const active = panel.dataset.adminPanel === state.adminTab;
+    panel.classList.toggle("admin-panel-hidden", !active);
   });
 }
 
@@ -986,6 +1037,12 @@ function wireForms() {
     clearAdminSession();
     renderAll();
     toast("Admin signed out.");
+  });
+  document.querySelectorAll("[data-admin-tab]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.adminTab = button.dataset.adminTab;
+      updateAdminTabs();
+    });
   });
   window.addEventListener("hashchange", showPage);
 

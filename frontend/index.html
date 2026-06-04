@@ -8,7 +8,7 @@
     <title>Abinet Connect</title>
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/assets/icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/styles.css?v=20260604-secureroles" />
+    <link rel="stylesheet" href="/styles.css?v=20260604-adminux" />
   </head>
   <body>
     <div class="app-shell">
@@ -95,14 +95,29 @@
               <button type="submit">Sign in</button>
             </form>
             <div id="adminPrivateArea" class="locked-area">
-            <div class="role-banner">
-              <p class="eyebrow">Admin workspace</p>
-              <h2>International Multi-Country Employment Marketplace Architecture.</h2>
-              <button id="adminLogout" class="secondary-button admin-logout-button" type="button">Log out</button>
+            <div class="staff-topbar">
+              <div>
+                <p class="eyebrow">Private staff portal</p>
+                <h2>Operations workspace</h2>
+              </div>
+              <div class="staff-account">
+                <span id="staffIdentity">Signed in</span>
+                <small id="staffSessionInfo">Secure staff session</small>
+                <button id="adminLogout" class="secondary-button" type="button">Log out</button>
+              </div>
             </div>
+            <div class="admin-tabs" role="tablist" aria-label="Admin sections">
+              <button class="active" type="button" data-admin-tab="overview">Overview</button>
+              <button type="button" data-admin-tab="applications">Applications</button>
+              <button type="button" data-admin-tab="verifications">Verifications</button>
+              <button type="button" data-admin-tab="users">Users & staff</button>
+              <button type="button" data-admin-tab="settings">Settings</button>
+            </div>
+            <div data-admin-panel="overview">
             <div class="metric-grid compact-metrics" id="adminMetrics"></div>
             <div id="adminOpsDashboard" class="dashboard-grid" aria-label="Admin operations dashboard"></div>
-            <div class="panel">
+            </div>
+            <div class="panel admin-note-panel" data-admin-panel="settings">
               <p class="eyebrow">Operating model</p>
               <h2>Master Admin → Country Admin → Regional Manager → Support / Verification Team</h2>
               <div class="architecture-grid">
@@ -120,7 +135,7 @@
                 <span>Audit Logs</span>
               </div>
             </div>
-            <div class="section-grid">
+            <div class="section-grid" data-admin-panel="verifications">
               <div class="panel" data-staff-tool="verification">
                 <div class="panel-header">
                   <div>
@@ -140,7 +155,7 @@
                 <div id="auditLog" class="timeline"></div>
               </div>
             </div>
-            <div class="panel" data-staff-tool="applications">
+            <div class="panel" data-staff-tool="applications" data-admin-panel="applications">
               <div class="panel-header">
                 <div>
                   <p class="eyebrow">Applicant workflow</p>
@@ -150,7 +165,7 @@
               </div>
               <div id="applicationQueue" class="stack-list"></div>
             </div>
-            <form id="staffRegisterForm" class="panel form-panel" data-staff-tool="staff">
+            <form id="staffRegisterForm" class="panel form-panel" data-staff-tool="staff" data-admin-panel="users">
               <p class="eyebrow">Master / Country admin</p>
               <h2>Create staff account</h2>
               <label>Name<input name="name" required placeholder="Admin full name" /></label>
@@ -174,12 +189,12 @@
               <label>Language<input name="language" placeholder="Amharic / English" /></label>
               <button type="submit">Create staff account</button>
             </form>
-            <div class="panel manager-note" data-staff-tool="staff">
+            <div class="panel manager-note" data-staff-tool="staff" data-admin-panel="users">
               <p class="eyebrow">Permission model</p>
               <h2>International staff hierarchy</h2>
               <p>Master Admin controls the global system. Country Admin manages one country. Regional Manager coordinates local teams. Verification, Support, Finance, and Compliance Officers operate their own queues.</p>
             </div>
-            <form id="categoryForm" class="panel form-panel" data-staff-tool="category">
+            <form id="categoryForm" class="panel form-panel" data-staff-tool="category" data-admin-panel="settings">
               <p class="eyebrow">Job categories</p>
               <h2>Add job category</h2>
               <label>Category name<input name="name" required placeholder="Healthcare, Construction, Security" /></label>
@@ -240,7 +255,7 @@
               <form id="registerForm" class="panel form-panel">
                 <p class="eyebrow" id="registerEyebrow">Public account</p>
                 <h2 id="registerTitle">Create worker account</h2>
-                <p class="form-intro">Create a username and password here. After registration, sign in with the same username and password to manage your profile, jobs, and applications.</p>
+                <p class="form-intro" id="registerIntro">Create a worker account to apply for jobs, complete verification, and manage your profile.</p>
                 <div class="step-indicator" aria-label="Registration progress">
                   <span class="active" data-step-pill="1">Login details</span>
                   <span data-step-pill="2">ID verification</span>
@@ -248,7 +263,7 @@
                   <span data-step-pill="4">Skills / business</span>
                 </div>
                 <div class="register-step" data-register-step="1">
-                <label>Name<input name="name" required placeholder="Full name or organization" /></label>
+                <label><span id="registerNameLabelText">Full legal name</span><input id="registerNameInput" name="name" required placeholder="Worker full legal name" /></label>
                 <label>Phone<input name="phone" required placeholder="+251911000000" /></label>
                 <label>Username<input name="username" required autocomplete="username" placeholder="your.username" /></label>
                 <label>Password<input name="password" required type="password" autocomplete="new-password" placeholder="Minimum 6 characters" /></label>
@@ -484,6 +499,6 @@
     </div>
 
     <div id="toast" role="status" aria-live="polite"></div>
-    <script src="/app.js?v=20260604-secureroles"></script>
+    <script src="/app.js?v=20260604-adminux"></script>
   </body>
 </html>
