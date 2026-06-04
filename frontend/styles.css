@@ -283,6 +283,7 @@ main {
 }
 
 .role-banner {
+  position: relative;
   display: grid;
   gap: 8px;
   min-height: 180px;
@@ -307,6 +308,18 @@ main {
 
 .role-banner .eyebrow {
   color: #facc15;
+}
+
+.admin-logout-button {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.admin-logout-button:hover {
+  background: #fff;
 }
 
 .employer-banner {

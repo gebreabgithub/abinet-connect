@@ -197,6 +197,8 @@ async function request(path, options = {}) {
 
 function clearAdminSession() {
   state.adminToken = "";
+  state.currentUser = null;
+  state.staffApplications = [];
   removeStoredAdminToken();
   updateAdminGate();
 }
@@ -963,6 +965,11 @@ function wireForms() {
     removeStoredPublicSession();
     renderAll();
     toast("Signed out.");
+  });
+  qs("#adminLogout").addEventListener("click", () => {
+    clearAdminSession();
+    renderAll();
+    toast("Admin signed out.");
   });
   window.addEventListener("hashchange", showPage);
 
