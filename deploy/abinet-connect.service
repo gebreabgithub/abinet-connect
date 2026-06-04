@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Type=simple
 WorkingDirectory=/opt/abinet-connect
-ExecStart=/usr/bin/python3 /opt/abinet-connect/backend/app.py
+ExecStart=/usr/bin/python3 /opt/abinet-connect/backend/app.py --host 127.0.0.1 --port 8080
 Restart=always
 RestartSec=5
 User=www-data
@@ -14,4 +14,3 @@ Environment=PYTHONUNBUFFERED=1
 
 [Install]
 WantedBy=multi-user.target
-

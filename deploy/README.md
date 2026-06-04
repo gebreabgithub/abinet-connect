@@ -14,10 +14,10 @@ Abinet Connect currently runs as one Python HTTP backend that serves the API and
 
 ## Local Service
 
-The service runs:
+The service runs locally behind nginx:
 
 ```bash
-python3 backend/app.py
+python3 backend/app.py --host 127.0.0.1 --port 8080
 ```
 
 Default URL:
@@ -25,6 +25,8 @@ Default URL:
 ```text
 http://127.0.0.1:8080
 ```
+
+The included systemd template uses the same host and port, and the included nginx template proxies public traffic to that backend.
 
 Private staff portal:
 
@@ -43,4 +45,3 @@ https://your-domain.example/?staff=1#admin
 - Add monitoring, uptime checks, and error logs.
 - Use a payment provider per country before accepting real payments.
 - Run a legal review for privacy, employment, broker, and worker-protection rules in each launch country.
-
