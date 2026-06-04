@@ -296,10 +296,25 @@ function renderMetrics() {
     </article>
   `).join("");
 
+  const quickStats = qs("#staffQuickStats");
+  if (quickStats) {
+    quickStats.innerHTML = [
+      ["workers", "Workers"],
+      ["openJobs", "Open jobs"],
+      ["applications", "Applications"],
+      ["users", "Users"],
+    ].map(([key, label]) => `
+      <article>
+        <strong>${formatMetric(key, state.stats[key])}</strong>
+        <span>${label}</span>
+      </article>
+    `).join("");
+  }
+
   qs("#adminMetrics").innerHTML = [
-    ["verificationRate", "Verification"],
-    ["fraudAlerts", "Risk alerts"],
-    ["openTickets", "Open tickets"],
+    ["workers", "Workers"],
+    ["openJobs", "Open jobs"],
+    ["applications", "Applications"],
     ["users", "Users"],
   ].map(([key, label]) => `
     <article class="metric-card">
@@ -702,8 +717,10 @@ function renderRoleDashboards() {
   ].join("");
 
   qs("#adminOpsDashboard").innerHTML = [
+    dashboardCard("Workers", state.workers.length, "Total worker profiles in the marketplace."),
+    dashboardCard("Open jobs", openJobs.length, "Employer demand currently accepting applicants."),
+    dashboardCard("Applications", state.stats.applications || applicationPool.length, "All submitted worker applications visible to staff."),
     dashboardCard("Users", state.users.length, "Employers, workers, brokers, and staff identities."),
-    dashboardCard("Countries", uniqueCount(state.users.map((user) => user.country)), "Country coverage from registered identities."),
     dashboardCard("Categories", state.jobCategories.length, "Job categories managed by staff.", `<button class="small-button" type="button" data-scroll-target="categoryForm">Add category</button>`),
     dashboardCard("Verifications", pendingWorkers.length, "Workers waiting for staff verification."),
     dashboardCard("Fraud alerts", state.fraudAlerts.length, "Risk signals and suspicious account activity."),

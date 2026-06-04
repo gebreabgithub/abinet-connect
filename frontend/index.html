@@ -8,7 +8,7 @@
     <title>Abinet Connect</title>
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/assets/icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/styles.css?v=20260604-authheader" />
+    <link rel="stylesheet" href="/styles.css?v=20260604-adminstats" />
   </head>
   <body>
     <div class="app-shell">
@@ -100,6 +100,7 @@
               <div>
                 <p class="eyebrow">Private staff portal</p>
                 <h2>Operations workspace</h2>
+                <div id="staffQuickStats" class="staff-quick-stats" aria-label="Operational totals"></div>
               </div>
               <div class="staff-account">
                 <span id="staffIdentity">Signed in</span>
@@ -500,6 +501,6 @@
     </div>
 
     <div id="toast" role="status" aria-live="polite"></div>
-    <script src="/app.js?v=20260604-authheader"></script>
+    <script src="/app.js?v=20260604-adminstats"></script>
   </body>
 </html>
