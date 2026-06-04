@@ -11,6 +11,11 @@ RestartSec=5
 User=www-data
 Group=www-data
 Environment=PYTHONUNBUFFERED=1
+Environment=SESSION_TTL_MINUTES=120
+Environment=MAX_LOGIN_ATTEMPTS=8
+# To require staff MFA, uncomment and set a private code:
+# Environment=STAFF_MFA_REQUIRED=1
+# Environment=STAFF_MFA_CODE=change-this-code
 
 [Install]
 WantedBy=multi-user.target

@@ -41,6 +41,8 @@ LOGIN_ATTEMPTS = {}
 SESSION_TTL_MS = int(os.environ.get("SESSION_TTL_MINUTES", "120")) * 60 * 1000
 MAX_LOGIN_ATTEMPTS = int(os.environ.get("MAX_LOGIN_ATTEMPTS", "8"))
 LOGIN_WINDOW_MS = int(os.environ.get("LOGIN_WINDOW_MINUTES", "15")) * 60 * 1000
+STAFF_MFA_REQUIRED = os.environ.get("STAFF_MFA_REQUIRED", "0") == "1"
+STAFF_MFA_CODE = os.environ.get("STAFF_MFA_CODE", "")
 
 STAFF_CAPABILITIES = {
     "MasterAdmin": {"staff", "category", "verification", "applications", "support", "finance", "compliance", "audit", "settings"},
@@ -304,6 +306,9 @@ class BrokerHandler(BaseHTTPRequestHandler):
                 return self.json(self.register_user(body), 201)
             if route == "/api/auth/login":
                 return self.json(self.login(body))
+            if route == "/api/auth/password-reset":
+                self.require_staff_capability("staff")
+                return self.json(self.reset_password(body))
             if route == "/api/staff/register":
                 self.require_staff_capability("staff")
                 return self.json(self.register_staff(body), 201)
@@ -448,6 +453,11 @@ class BrokerHandler(BaseHTTPRequestHandler):
         for user in store.read().get("users", []):
             if str(user.get("username", "")).lower() == username:
                 if user.get("passwordHash") == hash_password(password):
+                    if user.get("role") in STAFF_ROLES and STAFF_MFA_REQUIRED:
+                        mfa_code = str(body.get("mfaCode", "")).strip()
+                        if not STAFF_MFA_CODE or mfa_code != STAFF_MFA_CODE:
+                            self.record_login_failure(username)
+                            raise ApiError("Staff MFA code is required", 401)
                     token = make_id("session")
                     SESSIONS[token] = {"user": user, "createdAt": now_ms(), "expiresAt": now_ms() + SESSION_TTL_MS}
                     LOGIN_ATTEMPTS.pop(username, None)
@@ -466,6 +476,22 @@ class BrokerHandler(BaseHTTPRequestHandler):
     def record_login_failure(self, username):
         if username:
             LOGIN_ATTEMPTS.setdefault(username, []).append(now_ms())
+
+    def reset_password(self, body):
+        username = str(body.get("username", "")).strip().lower()
+        new_password = str(body.get("newPassword", ""))
+        if not username or len(new_password) < 8:
+            raise ApiError("Username and a new password of at least 8 characters are required", 400)
+
+        def mutate(data):
+            for user in data.get("users", []):
+                if str(user.get("username", "")).lower() == username:
+                    user["passwordHash"] = hash_password(new_password)
+                    audit(data, "Staff", "reset password", user.get("name", username))
+                    return {"status": "ok", "user": public_user(user)}
+            raise ApiError("User not found", 404)
+
+        return store.update(mutate)
 
     def filter_workers(self, query):
         skill = query.get("skill", [""])[0]
@@ -733,7 +759,7 @@ class BrokerHandler(BaseHTTPRequestHandler):
     def create_application(self, user, body):
         if user.get("role") != "Worker":
             raise ApiError("Only worker accounts can apply for jobs", 403)
-        job_id = str(body.get("jobId", "")).strip()
+        job_id = str(body.get("jobId") or body.get("job_id") or body.get("id") or "").strip()
         message = str(body.get("message", "")).strip()
         if not job_id:
             raise ApiError("Job id is required", 400)
@@ -742,7 +768,7 @@ class BrokerHandler(BaseHTTPRequestHandler):
             job = next((item for item in data.get("jobs", []) if item.get("id") == job_id), None)
             if not job:
                 raise ApiError("Job not found", 404)
-            if job.get("status") not in {"Open", "Matched"}:
+            if (job.get("status") or "Open") not in {"Open", "Matched"}:
                 raise ApiError("This job is not accepting applications", 400)
             for app in data.setdefault("applications", []):
                 if app.get("jobId") == job_id and app.get("workerId") == user.get("id"):
@@ -876,6 +902,7 @@ class BrokerHandler(BaseHTTPRequestHandler):
             raise ApiError("Payer, amount, and payment method are required", 400)
 
         def mutate(data):
+            invoice_number = f"INV-{uuid.uuid4().hex[:8].upper()}"
             item = {
                 "id": make_id("pay"),
                 "payer": payer,
@@ -884,7 +911,8 @@ class BrokerHandler(BaseHTTPRequestHandler):
                 "currency": currency,
                 "method": method,
                 "status": "Pending",
-                "invoiceNumber": f"INV-{uuid.uuid4().hex[:8].upper()}",
+                "invoiceNumber": invoice_number,
+                "invoice_number": invoice_number,
                 "createdAt": now_ms(),
             }
             data.setdefault("payments", []).insert(0, item)
@@ -952,11 +980,13 @@ class BrokerHandler(BaseHTTPRequestHandler):
 
     def verify_worker(self, worker_id, body):
         def mutate(data):
+            lookup = normalize_phone(worker_id) if worker_id else ""
             for worker in data.get("workers", []):
-                if worker.get("id") == worker_id:
+                worker_phone = normalize_phone(worker.get("phone"))
+                if worker.get("id") == worker_id or worker.get("userId") == worker_id or (lookup and worker_phone == lookup):
                     worker["verified"] = bool(body.get("verified", True))
                     worker["verificationStatus"] = "Verified" if worker["verified"] else "Rejected"
-                    notify(data, worker_id, "Verification updated", f"Your verification status is {worker['verificationStatus']}.", "success" if worker["verified"] else "warning")
+                    notify(data, worker.get("id"), "Verification updated", f"Your verification status is {worker['verificationStatus']}.", "success" if worker["verified"] else "warning")
                     audit(data, "Staff", "updated verification", worker.get("name", worker_id))
                     return copy.deepcopy(worker)
             raise ApiError("Worker not found", 404)

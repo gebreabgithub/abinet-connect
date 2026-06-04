@@ -8,7 +8,7 @@
     <title>Abinet Connect</title>
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/assets/icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/styles.css?v=20260604-adminclean" />
+    <link rel="stylesheet" href="/styles.css?v=20260604-productionfixes" />
   </head>
   <body>
     <div class="app-shell">
@@ -93,6 +93,7 @@
               <h2>Admin sign in</h2>
               <label>Username<input name="username" required autocomplete="username" placeholder="admin" /></label>
               <label>Password<input name="password" required type="password" autocomplete="current-password" placeholder="admin123" /></label>
+              <label>MFA code<input name="mfaCode" inputmode="numeric" autocomplete="one-time-code" placeholder="Only if enabled" /></label>
               <button type="submit">Sign in</button>
             </form>
             <div id="adminPrivateArea" class="locked-area">
@@ -248,6 +249,13 @@
               <h2>International staff hierarchy</h2>
               <p>Master Admin controls the global system. Country Admin manages one country. Regional Manager coordinates local teams. Verification, Support, Finance, and Compliance Officers operate their own queues.</p>
             </div>
+            <form id="passwordResetForm" class="panel form-panel" data-staff-tool="staff" data-admin-panel="users">
+              <p class="eyebrow">Account recovery</p>
+              <h2>Reset user password</h2>
+              <label>Username<input name="username" required autocomplete="username" placeholder="user@example.com or username" /></label>
+              <label>New password<input name="newPassword" required type="password" autocomplete="new-password" placeholder="Minimum 8 characters" /></label>
+              <button type="submit">Reset password</button>
+            </form>
             <form id="categoryForm" class="panel form-panel" data-staff-tool="category" data-admin-panel="settings">
               <p class="eyebrow">Job categories</p>
               <h2>Add job category</h2>
@@ -553,6 +561,6 @@
     </div>
 
     <div id="toast" role="status" aria-live="polite"></div>
-    <script src="/app.js?v=20260604-adminclean"></script>
+    <script src="/app.js?v=20260604-productionfixes"></script>
   </body>
 </html>

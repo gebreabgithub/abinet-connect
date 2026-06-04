@@ -1,0 +1,9 @@
+[Unit]
+Description=Back up Abinet Connect JSON data
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh /opt/abinet-connect/deploy/backup-data.sh
+User=www-data
+Group=www-data
+

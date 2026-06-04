@@ -1339,6 +1339,7 @@ function wireForms() {
         body: JSON.stringify({
           username: form.get("username"),
           password: form.get("password"),
+          mfaCode: form.get("mfaCode"),
         }),
       });
       state.adminToken = session.token;
@@ -1349,6 +1350,27 @@ function wireForms() {
       renderAll();
       updateAdminGate();
       toast(`${session.user.role} signed in.`);
+    } catch (error) {
+      toast(error.message, "error");
+    }
+  });
+
+  qs("#passwordResetForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
+    try {
+      await request("/api/auth/password-reset", {
+        method: "POST",
+        headers: { "X-Admin-Token": state.adminToken },
+        body: JSON.stringify({
+          username: form.get("username"),
+          newPassword: form.get("newPassword"),
+        }),
+      });
+      formElement.reset();
+      toast("Password reset completed.");
+      await loadAll();
     } catch (error) {
       toast(error.message, "error");
     }
