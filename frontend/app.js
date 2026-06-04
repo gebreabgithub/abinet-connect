@@ -311,17 +311,20 @@ function renderMetrics() {
     `).join("");
   }
 
-  qs("#adminMetrics").innerHTML = [
-    ["workers", "Workers"],
-    ["openJobs", "Open jobs"],
-    ["applications", "Applications"],
-    ["users", "Users"],
-  ].map(([key, label]) => `
-    <article class="metric-card">
-      <span>${label}</span>
-      <strong>${formatMetric(key, state.stats[key])}</strong>
-    </article>
-  `).join("");
+  const adminMetrics = qs("#adminMetrics");
+  if (adminMetrics) {
+    adminMetrics.innerHTML = [
+      ["workers", "Workers"],
+      ["openJobs", "Open jobs"],
+      ["applications", "Applications"],
+      ["users", "Users"],
+    ].map(([key, label]) => `
+      <article class="metric-card">
+        <span>${label}</span>
+        <strong>${formatMetric(key, state.stats[key])}</strong>
+      </article>
+    `).join("");
+  }
 
   qs("#openJobsCount").textContent = `${state.stats.openJobs || 0} open`;
   renderCategoryOptions();
