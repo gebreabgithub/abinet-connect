@@ -8,7 +8,7 @@
     <title>Abinet Connect</title>
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/assets/icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/styles.css?v=20260604-adminux" />
+    <link rel="stylesheet" href="/styles.css?v=20260604-authheader" />
   </head>
   <body>
     <div class="app-shell">
@@ -37,6 +37,7 @@
             <h1 id="pageTitle">Choose your role</h1>
           </div>
           <div class="topbar-actions">
+            <span id="publicSessionBadge" class="session-badge hidden"></span>
             <button id="publicRegister" type="button">Register</button>
             <button id="publicSignIn" class="secondary-button" type="button">Sign in</button>
             <button id="publicLogout" class="secondary-button hidden" type="button">Log out</button>
@@ -499,6 +500,6 @@
     </div>
 
     <div id="toast" role="status" aria-live="polite"></div>
-    <script src="/app.js?v=20260604-adminux"></script>
+    <script src="/app.js?v=20260604-authheader"></script>
   </body>
 </html>

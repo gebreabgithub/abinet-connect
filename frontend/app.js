@@ -762,9 +762,7 @@ function profileDetailsFor(user) {
 function renderAccountDashboard() {
   const panel = qs("#accountDashboard");
   const signedIn = Boolean(state.publicUser);
-  qs("#publicSignIn").classList.toggle("hidden", signedIn);
-  qs("#publicRegister").classList.toggle("hidden", signedIn);
-  qs("#publicLogout").classList.toggle("hidden", !signedIn);
+  updatePublicAuthControls();
   panel.classList.toggle("hidden", !signedIn);
   if (!signedIn) {
     panel.innerHTML = "";
@@ -917,6 +915,19 @@ function renderAccountDashboard() {
   });
 }
 
+function updatePublicAuthControls() {
+  const staffPage = currentPage() === "admin" && isStaffPortal();
+  const signedIn = Boolean(state.publicUser);
+  const badge = qs("#publicSessionBadge");
+  qs("#publicSignIn").classList.toggle("hidden", staffPage || signedIn);
+  qs("#publicRegister").classList.toggle("hidden", staffPage || signedIn);
+  qs("#publicLogout").classList.toggle("hidden", staffPage || !signedIn);
+  if (badge) {
+    badge.classList.toggle("hidden", staffPage || !signedIn);
+    badge.textContent = signedIn ? `${state.publicUser.name} · ${state.publicUser.role}` : "";
+  }
+}
+
 function renderAll() {
   renderMetrics();
   renderRoleExperience();
@@ -953,6 +964,7 @@ function showPage() {
     link.classList.toggle("active", link.dataset.pageLink === page);
   });
   qs("#pageTitle").textContent = pageTitles[page];
+  updatePublicAuthControls();
   updateAdminGate();
   if (window.location.hash !== `#${page}`) {
     history.replaceState(null, "", `#${page}`);
