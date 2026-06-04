@@ -59,6 +59,14 @@ button:hover {
   background: #cbd5e1;
 }
 
+.danger-button {
+  background: var(--red);
+}
+
+.danger-button:hover {
+  background: #991b1b;
+}
+
 input,
 select,
 textarea {
@@ -649,6 +657,37 @@ main {
   justify-self: start;
 }
 
+.step-indicator {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.step-indicator span {
+  min-height: 38px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  background: var(--panel-2);
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.step-indicator span.active {
+  color: #fff;
+  border-color: var(--brand);
+  background: var(--brand);
+}
+
+.step-indicator span.complete {
+  color: var(--brand);
+  border-color: #bbf7d0;
+  background: #dcfce7;
+}
+
 .register-role-actions {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -743,12 +782,34 @@ main {
 #employee #registerForm .form-intro,
 #employee #registerForm .register-role-actions,
 #employee #registerForm .field-hint,
-#employee #registerForm button[type="submit"] {
+#employee #registerForm .step-controls {
   grid-column: 1 / -1;
 }
 
 #employee #registerForm h2 {
   font-size: clamp(1.45rem, 3vw, 2.05rem);
+}
+
+.register-step {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.register-step .register-role-actions,
+.register-step .field-hint {
+  grid-column: 1 / -1;
+}
+
+.hidden-step {
+  display: none !important;
+}
+
+.step-controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 .form-intro {
@@ -881,6 +942,11 @@ main {
   background: #fef3c7;
 }
 
+.badge.danger {
+  color: var(--red);
+  background: #fee2e2;
+}
+
 .quiet-badge {
   color: var(--muted);
   background: #f1f5f9;
@@ -906,6 +972,17 @@ main {
   justify-content: space-between;
   align-items: center;
   gap: 12px;
+}
+
+.application-record footer {
+  align-items: flex-start;
+}
+
+.queue-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 .small-button {
@@ -1024,6 +1101,7 @@ main {
   .role-picker,
   .account-status-grid,
   .action-grid,
+  .step-indicator,
   .register-role-actions,
   .architecture-grid,
   .table-row {
@@ -1044,6 +1122,18 @@ main {
   #employee #registerForm {
     grid-template-columns: 1fr;
     position: static;
+  }
+
+  .register-step {
+    grid-template-columns: 1fr;
+  }
+
+  .step-controls,
+  .queue-actions,
+  .record footer {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
   }
 
   .hero-panel {

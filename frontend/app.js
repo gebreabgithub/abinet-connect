@@ -9,6 +9,7 @@ const state = {
   auditLog: [],
   jobCategories: [],
   applications: [],
+  staffApplications: [],
   notifications: [],
   complianceRequests: [],
   safetyReports: [],
@@ -19,6 +20,7 @@ const state = {
   currentUser: null,
   publicToken: readStoredPublicToken(),
   publicUser: readStoredPublicUser(),
+  registerStep: 1,
 };
 
 const staffRoles = [
@@ -31,6 +33,19 @@ const staffRoles = [
   "ComplianceOfficer",
   "Manager",
 ];
+
+const staffCapabilities = {
+  MasterAdmin: ["staff", "category", "verification", "applications", "support", "finance", "compliance", "audit", "settings"],
+  CountryAdmin: ["staff", "category", "verification", "applications", "support", "finance", "compliance", "audit"],
+  RegionalManager: ["verification", "applications", "support", "audit"],
+  VerificationOfficer: ["verification", "applications"],
+  SupportAgent: ["support", "applications"],
+  FinanceOfficer: ["finance", "applications"],
+  ComplianceOfficer: ["compliance", "audit"],
+  Manager: ["verification", "applications", "support", "category", "audit"],
+};
+
+const registerStepCount = 4;
 
 const metricLabels = [
   ["workers", "Workers"],
@@ -222,6 +237,20 @@ async function loadAccountData() {
   }
 }
 
+async function loadStaffData() {
+  if (!state.adminToken || !state.currentUser) {
+    state.staffApplications = [];
+    return;
+  }
+  try {
+    state.staffApplications = await request("/api/applications", {
+      headers: { "X-Admin-Token": state.adminToken },
+    });
+  } catch {
+    state.staffApplications = [];
+  }
+}
+
 function toast(message, type = "success") {
   const element = qs("#toast");
   element.textContent = message;
@@ -309,6 +338,40 @@ function updateIdentityDocumentRequirement() {
   });
 }
 
+function updateRegisterStep() {
+  const step = Math.min(Math.max(state.registerStep, 1), registerStepCount);
+  state.registerStep = step;
+  document.querySelectorAll("[data-register-step]").forEach((element) => {
+    element.classList.toggle("hidden-step", Number(element.dataset.registerStep) !== step);
+  });
+  document.querySelectorAll("[data-step-pill]").forEach((pill) => {
+    const pillStep = Number(pill.dataset.stepPill);
+    pill.classList.toggle("active", pillStep === step);
+    pill.classList.toggle("complete", pillStep < step);
+  });
+  qs("#registerPrev").classList.toggle("hidden", step === 1);
+  qs("#registerNext").classList.toggle("hidden", step === registerStepCount);
+  qs("#registerSubmit").classList.toggle("hidden", step !== registerStepCount);
+}
+
+function validateRegisterStep() {
+  const currentStep = qs(`[data-register-step="${state.registerStep}"]`);
+  if (!currentStep) return true;
+  const fields = currentStep.querySelectorAll("input, select, textarea");
+  for (const field of fields) {
+    if (!field.checkValidity()) {
+      field.reportValidity();
+      return false;
+    }
+  }
+  return true;
+}
+
+function resetRegisterStep() {
+  state.registerStep = 1;
+  updateRegisterStep();
+}
+
 function openRegistration(role = "Worker") {
   window.location.hash = "employee";
   showPage();
@@ -317,6 +380,7 @@ function openRegistration(role = "Worker") {
     roleSelect.value = role;
     updateIdentityDocumentRequirement();
   }
+  resetRegisterStep();
   qs("#registerForm")?.scrollIntoView({ block: "start", behavior: "smooth" });
 }
 
@@ -483,6 +547,47 @@ function renderVerificationQueue() {
   });
 }
 
+function renderApplicationQueue() {
+  const queue = qs("#applicationQueue");
+  const count = qs("#applicationQueueCount");
+  if (!queue || !count) return;
+  const applications = state.staffApplications || [];
+  const waiting = applications.filter((item) => item.status === "Submitted").length;
+  count.textContent = `${waiting} waiting`;
+  queue.innerHTML = applications.map((application) => `
+    <article class="record application-record">
+      <div>
+        <strong>${escapeHtml(application.workerName || "Worker")} → ${escapeHtml(application.jobTitle || "Job")}</strong>
+        <span>${escapeHtml(application.employer || "Employer")} · ${timeAgo(application.createdAt)}</span>
+      </div>
+      <footer>
+        <span class="badge ${application.status === "Accepted" ? "good" : application.status === "Rejected" ? "danger" : application.status === "Shortlisted" ? "warn" : ""}">${escapeHtml(application.status)}</span>
+        <div class="queue-actions">
+          <button class="small-button secondary-button" data-application-status="Shortlisted" data-application-id="${escapeHtml(application.id)}" type="button">Shortlist</button>
+          <button class="small-button" data-application-status="Accepted" data-application-id="${escapeHtml(application.id)}" type="button">Accept</button>
+          <button class="small-button danger-button" data-application-status="Rejected" data-application-id="${escapeHtml(application.id)}" type="button">Reject</button>
+        </div>
+      </footer>
+    </article>
+  `).join("") || `<div class="empty-state">No applications submitted yet.</div>`;
+
+  document.querySelectorAll("[data-application-status]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      try {
+        await request(`/api/applications/${button.dataset.applicationId}/status`, {
+          method: "PATCH",
+          headers: { "X-Admin-Token": state.adminToken },
+          body: JSON.stringify({ status: button.dataset.applicationStatus }),
+        });
+        toast(`Application ${button.dataset.applicationStatus.toLowerCase()}.`);
+        await loadAll();
+      } catch (error) {
+        toast(error.message, "error");
+      }
+    });
+  });
+}
+
 function renderTickets() {
   qs("#ticketList").innerHTML = state.supportTickets.map((ticket) => `
     <article class="record">
@@ -523,7 +628,8 @@ function dashboardCard(title, value, detail, action = "") {
 
 function renderRoleDashboards() {
   const openJobs = state.jobs.filter((job) => job.status === "Open");
-  const submittedApplications = state.applications.filter((item) => item.status === "Submitted");
+  const applicationPool = state.staffApplications.length ? state.staffApplications : state.applications;
+  const submittedApplications = applicationPool.filter((item) => item.status === "Submitted");
   const activePlacements = state.placements.filter((item) => !["Closed", "Cancelled"].includes(item.status));
   const pendingPayments = state.payments.filter((item) => item.status !== "Paid");
   const openTickets = state.supportTickets.filter((item) => item.status !== "Closed");
@@ -779,6 +885,7 @@ function renderAll() {
   renderJobs();
   renderPlacements();
   renderVerificationQueue();
+  renderApplicationQueue();
   renderTickets();
   renderAudit();
   renderRoleDashboards();
@@ -818,8 +925,9 @@ function updateAdminGate() {
   if (!privateArea || !loginForm) return;
   privateArea.classList.toggle("locked-area", !state.adminToken);
   loginForm.classList.toggle("hidden", Boolean(state.adminToken));
-  document.querySelectorAll(".master-only").forEach((element) => {
-    element.classList.toggle("locked-area", state.currentUser?.role !== "MasterAdmin");
+  const capabilities = new Set(staffCapabilities[state.currentUser?.role] || []);
+  document.querySelectorAll("[data-staff-tool]").forEach((element) => {
+    element.classList.toggle("locked-area", !capabilities.has(element.dataset.staffTool));
   });
 }
 
@@ -837,6 +945,7 @@ async function loadAll() {
     state.publicUser = preservedPublicUser;
     await validateAdminSession();
     await loadAccountData();
+    await loadStaffData();
     renderAll();
     updateAdminGate();
   } catch (error) {
@@ -871,6 +980,17 @@ function wireForms() {
     button.addEventListener("click", () => {
       openRegistration(button.dataset.registerRole);
     });
+  });
+
+  qs("#registerPrev").addEventListener("click", () => {
+    state.registerStep = Math.max(1, state.registerStep - 1);
+    updateRegisterStep();
+  });
+
+  qs("#registerNext").addEventListener("click", () => {
+    if (!validateRegisterStep()) return;
+    state.registerStep = Math.min(registerStepCount, state.registerStep + 1);
+    updateRegisterStep();
   });
 
   qs("#searchWorkers").addEventListener("click", async () => {
@@ -911,6 +1031,7 @@ function wireForms() {
       });
       const username = form.get("username");
       formElement.reset();
+      resetRegisterStep();
       toast("Account created. Sign in with your username and password.");
       await loadAll();
       openPublicSignIn(username);
@@ -923,6 +1044,7 @@ function wireForms() {
   });
   qs("#registerForm select[name='role']").addEventListener("change", updateIdentityDocumentRequirement);
   updateIdentityDocumentRequirement();
+  updateRegisterStep();
 
   qs("#jobForm").addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -1006,6 +1128,8 @@ function wireForms() {
       state.currentUser = session.user;
       writeStoredAdminToken(session.token);
       formElement.reset();
+      await loadStaffData();
+      renderAll();
       updateAdminGate();
       toast(`${session.user.role} signed in.`);
     } catch (error) {

@@ -8,7 +8,7 @@
     <title>Abinet Connect</title>
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/assets/icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/styles.css?v=20260529-dashboards" />
+    <link rel="stylesheet" href="/styles.css?v=20260604-workflows" />
   </head>
   <body>
     <div class="app-shell">
@@ -120,7 +120,7 @@
               </div>
             </div>
             <div class="section-grid">
-              <div class="panel">
+              <div class="panel" data-staff-tool="verification">
                 <div class="panel-header">
                   <div>
                     <p class="eyebrow">Trust center</p>
@@ -129,7 +129,7 @@
                 </div>
                 <div id="verificationQueue" class="stack-list"></div>
               </div>
-              <div class="panel">
+              <div class="panel" data-staff-tool="audit">
                 <div class="panel-header">
                   <div>
                     <p class="eyebrow">Risk monitoring</p>
@@ -139,8 +139,18 @@
                 <div id="auditLog" class="timeline"></div>
               </div>
             </div>
-            <form id="staffRegisterForm" class="panel form-panel master-only">
-              <p class="eyebrow">Master admin only</p>
+            <div class="panel" data-staff-tool="applications">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Applicant workflow</p>
+                  <h2>Applications queue</h2>
+                </div>
+                <span class="quiet-badge" id="applicationQueueCount">0 waiting</span>
+              </div>
+              <div id="applicationQueue" class="stack-list"></div>
+            </div>
+            <form id="staffRegisterForm" class="panel form-panel" data-staff-tool="staff">
+              <p class="eyebrow">Master / Country admin</p>
               <h2>Create staff account</h2>
               <label>Name<input name="name" required placeholder="Admin full name" /></label>
               <label>Phone<input name="phone" required placeholder="+251911000000" /></label>
@@ -163,12 +173,12 @@
               <label>Language<input name="language" placeholder="Amharic / English" /></label>
               <button type="submit">Create staff account</button>
             </form>
-            <div class="panel manager-note master-only">
+            <div class="panel manager-note" data-staff-tool="staff">
               <p class="eyebrow">Permission model</p>
               <h2>International staff hierarchy</h2>
               <p>Master Admin controls the global system. Country Admin manages one country. Regional Manager coordinates local teams. Verification, Support, Finance, and Compliance Officers operate their own queues.</p>
             </div>
-            <form id="categoryForm" class="panel form-panel">
+            <form id="categoryForm" class="panel form-panel" data-staff-tool="category">
               <p class="eyebrow">Job categories</p>
               <h2>Add job category</h2>
               <label>Category name<input name="name" required placeholder="Healthcare, Construction, Security" /></label>
@@ -230,6 +240,13 @@
                 <p class="eyebrow" id="registerEyebrow">Public account</p>
                 <h2 id="registerTitle">Create worker account</h2>
                 <p class="form-intro">Create a username and password here. After registration, sign in with the same username and password to manage your profile, jobs, and applications.</p>
+                <div class="step-indicator" aria-label="Registration progress">
+                  <span class="active" data-step-pill="1">Account</span>
+                  <span data-step-pill="2">Identity</span>
+                  <span data-step-pill="3">Location</span>
+                  <span data-step-pill="4">Profile</span>
+                </div>
+                <div class="register-step" data-register-step="1">
                 <div class="register-role-actions" aria-label="Choose account type">
                   <button class="secondary-button selected" type="button" data-register-role="Worker">Worker</button>
                   <button class="secondary-button" type="button" data-register-role="Employer">Employer</button>
@@ -246,6 +263,8 @@
                     <option>Broker</option>
                   </select>
                 </label>
+                </div>
+                <div class="register-step hidden-step" data-register-step="2">
                 <label>Identity Document Type
                   <select name="identityDocumentType" id="identityDocumentType">
                     <option>National ID</option>
@@ -261,6 +280,8 @@
                   <input name="identityDocumentNumber" id="identityDocumentNumberInput" placeholder="Required for employers, optional for workers" />
                 </label>
                 <p id="identityDocumentHint" class="field-hint">Required for Employer registration. Optional for Worker registration.</p>
+                </div>
+                <div class="register-step hidden-step" data-register-step="3">
                 <label>Address<input name="address" placeholder="Bole, Addis Ababa" /></label>
                 <label>Country<input name="country" placeholder="Ethiopia" /></label>
                 <label>City<input name="city" placeholder="Addis Ababa" /></label>
@@ -286,9 +307,16 @@
                     <option>In-app notification</option>
                   </select>
                 </label>
+                </div>
+                <div class="register-step hidden-step" data-register-step="4">
                 <label>Skills<input name="skills" placeholder="Cleaning, cooking, delivery" /></label>
                 <label>Availability<input name="availability" placeholder="Available now" /></label>
-                <button id="registerSubmit" type="submit">Create worker account</button>
+                </div>
+                <div class="step-controls">
+                  <button id="registerPrev" class="secondary-button" type="button">Back</button>
+                  <button id="registerNext" type="button">Continue</button>
+                  <button id="registerSubmit" type="submit">Create worker account</button>
+                </div>
               </form>
               <div id="workerDashboard" class="dashboard-grid" aria-label="Worker dashboard"></div>
               <div class="panel">
@@ -450,6 +478,6 @@
     </div>
 
     <div id="toast" role="status" aria-live="polite"></div>
-    <script src="/app.js?v=20260529-dashboards"></script>
+    <script src="/app.js?v=20260604-workflows"></script>
   </body>
 </html>

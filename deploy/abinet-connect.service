@@ -1,0 +1,17 @@
+[Unit]
+Description=Abinet Connect employment marketplace
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/abinet-connect
+ExecStart=/usr/bin/python3 /opt/abinet-connect/backend/app.py
+Restart=always
+RestartSec=5
+User=www-data
+Group=www-data
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
+

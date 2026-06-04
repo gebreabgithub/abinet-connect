@@ -1,6 +1,6 @@
-# EthioWork Exchange
+# Abinet Connect
 
-A stable local foundation for an employment broker platform in Ethiopia. It connects employers, workers, brokers/agencies, admins, and support teams through identity intake, worker discovery, job demand, placement operations, trust verification, support tickets, audit activity, and analytics.
+An international, role-based employment marketplace that connects employers, workers, and brokers through verified profiles, secure placement workflows, multilingual access, country-based administration, payments, compliance, and worker protection tools.
 
 ## What is included
 
@@ -12,9 +12,12 @@ A stable local foundation for an employment broker platform in Ethiopia. It conn
 - Employer job posting
 - Broker placement tracking
 - Admin verification queue
-- Master Admin and Manager permission model
+- Master Admin, Country Admin, Regional Manager, and officer permission model
 - Staff-only job category management
+- Staff application queue with shortlist, accept, and reject actions
+- Multi-step public registration for employer, worker, and broker accounts
 - Username/password registration for new public users
+- Privacy, compliance, payment, and worker safety request forms
 - Support ticket creation
 - Audit log and platform analytics
 - Static file serving from the same backend
@@ -22,19 +25,25 @@ A stable local foundation for an employment broker platform in Ethiopia. It conn
 ## Run locally
 
 ```bash
-python3 backend/app.py
+python3 backend/app.py --port 8080
 ```
 
 Then open:
 
 ```text
-http://localhost:8000
+http://127.0.0.1:8080
 ```
 
-If port `8000` is busy:
+If port `8080` is busy, choose another port:
 
 ```bash
-python3 backend/app.py --port 8080
+python3 backend/app.py --port 8081
+```
+
+Private staff portal:
+
+```text
+http://127.0.0.1:8080/?staff=1#admin
 ```
 
 ## Android installable app
@@ -66,6 +75,10 @@ http://YOUR_COMPUTER_IP:8080
 
 For a real Play Store APK later, wrap this web app with Capacitor or rebuild the client in native Android/Kotlin and connect it to the same backend API.
 
+## Hosting
+
+Deployment templates and a VPS checklist are in `deploy/`.
+
 ## Suggested production stack
 
 The PDF recommends:
@@ -91,13 +104,25 @@ This version avoids external dependencies so it can run immediately from this fo
 - `GET /api/admin/verification-queue`
 - `GET /api/support/tickets`
 - `GET /api/job-categories`
+- `GET /api/applications`
+- `GET /api/notifications`
+- `GET /api/compliance/requests`
+- `GET /api/safety/reports`
+- `GET /api/payments`
 - `POST /api/auth/login`
 - `POST /api/staff/register`
 - `POST /api/job-categories`
 - `POST /api/users/register`
 - `POST /api/register`
 - `POST /api/jobs`
+- `POST /api/applications`
 - `POST /api/placements`
 - `POST /api/support/tickets`
+- `POST /api/compliance/requests`
+- `POST /api/safety/reports`
+- `POST /api/payments`
 - `PATCH /api/workers/{worker_id}/verify`
 - `PATCH /api/jobs/{job_id}/status`
+- `PATCH /api/applications/{application_id}/status`
+- `PATCH /api/notifications/{notification_id}/read`
+- `PATCH /api/users/{user_id}/profile`
