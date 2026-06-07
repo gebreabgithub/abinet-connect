@@ -447,9 +447,19 @@ function openPublicSignIn(username = "") {
   showPage();
   const form = qs("#publicLoginForm");
   form.classList.remove("hidden");
+  qs("#forgotPasswordForm")?.classList.add("hidden");
   const usernameInput = qs("#publicLoginForm input[name='username']");
   if (username) usernameInput.value = username;
   qs("#publicLoginForm input[name='password']").focus();
+}
+
+function openForgotPassword() {
+  window.location.hash = "overview";
+  showPage();
+  qs("#publicLoginForm")?.classList.add("hidden");
+  const form = qs("#forgotPasswordForm");
+  form.classList.remove("hidden");
+  qs("#forgotPasswordForm input[name='requester']").focus();
 }
 
 function renderRoleExperience() {
@@ -1400,6 +1410,33 @@ function wireForms() {
       await loadAccountData();
       renderAll();
       toast(`${session.user.role} signed in.`);
+    } catch (error) {
+      toast(error.message, "error");
+    }
+  });
+
+  qs("#forgotPasswordToggle").addEventListener("click", openForgotPassword);
+  qs("#forgotPasswordCancel").addEventListener("click", openPublicSignIn);
+
+  qs("#forgotPasswordForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
+    try {
+      await request("/api/support/tickets", {
+        method: "POST",
+        body: JSON.stringify({
+          requester: form.get("requester"),
+          topic: "Password reset request",
+          priority: "High",
+          details: `${form.get("role")} account. Contact: ${form.get("contact")}`,
+        }),
+      });
+      formElement.reset();
+      qs("#forgotPasswordForm").classList.add("hidden");
+      qs("#publicLoginForm").classList.remove("hidden");
+      toast("Password help request sent. Staff will verify your identity before resetting it.");
+      await loadAll();
     } catch (error) {
       toast(error.message, "error");
     }

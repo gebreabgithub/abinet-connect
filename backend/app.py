@@ -824,8 +824,9 @@ class BrokerHandler(BaseHTTPRequestHandler):
         return store.update(mutate)
 
     def create_ticket(self, body):
-        requester = str(body.get("requester", "")).strip()
+        requester = str(body.get("requester") or body.get("name") or body.get("user") or "").strip()
         topic = str(body.get("topic", "")).strip()
+        details = str(body.get("details") or body.get("message") or "").strip()
         if not requester or not topic:
             raise ApiError("Requester and topic are required", 400)
 
@@ -834,6 +835,7 @@ class BrokerHandler(BaseHTTPRequestHandler):
                 "id": make_id("ticket"),
                 "requester": requester,
                 "topic": topic,
+                "details": details,
                 "priority": str(body.get("priority", "Medium")).strip() or "Medium",
                 "status": "Open",
                 "createdAt": now_ms(),
@@ -845,9 +847,9 @@ class BrokerHandler(BaseHTTPRequestHandler):
         return store.update(mutate)
 
     def create_compliance_request(self, body):
-        requester = str(body.get("requester", "")).strip()
+        requester = str(body.get("requester") or body.get("name") or body.get("user") or "").strip()
         request_type = str(body.get("requestType", "")).strip()
-        details = str(body.get("details", "")).strip()
+        details = str(body.get("details") or body.get("message") or "").strip()
         if not requester or not request_type:
             raise ApiError("Requester and request type are required", 400)
 

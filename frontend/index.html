@@ -8,7 +8,7 @@
     <title>Abinet Connect</title>
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/assets/icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/styles.css?v=20260604-productionfixes" />
+    <link rel="stylesheet" href="/styles.css?v=20260607-uiux" />
   </head>
   <body>
     <div class="app-shell">
@@ -46,18 +46,6 @@
 
         <main>
           <section id="overview" class="page active-page" data-page="overview">
-            <div class="hero-panel">
-              <div class="hero-copy">
-                <p class="eyebrow">Start with your goal</p>
-                <h2>Choose how you want to use the employment exchange.</h2>
-                <p>
-                  Abinet Connect is an international, role-based employment marketplace that connects
-                  employers, workers, and brokers through verified profiles, secure placement workflows,
-                  multilingual access, country-based administration, payments, compliance, and worker protection tools.
-                </p>
-              </div>
-              <div class="hero-metrics" id="heroMetrics"></div>
-            </div>
             <div class="role-picker" aria-label="Interactive role selection">
               <button class="role-card employer-card" type="button" data-role-choice="employer">
                 <span>I Need Workers</span>
@@ -75,12 +63,44 @@
                 <small>Assign workers, track placements, and manage commissions.</small>
               </button>
             </div>
+            <div class="hero-panel">
+              <div class="hero-copy">
+                <p class="eyebrow">Start with your goal</p>
+                <h2>Choose how you want to use the employment exchange.</h2>
+                <p>
+                  Abinet Connect is an international, role-based employment marketplace that connects
+                  employers, workers, and brokers through verified profiles, secure placement workflows,
+                  multilingual access, country-based administration, payments, compliance, and worker protection tools.
+                </p>
+              </div>
+              <div class="hero-metrics" id="heroMetrics"></div>
+            </div>
             <form id="publicLoginForm" class="panel form-panel public-login-panel hidden">
               <p class="eyebrow">Client sign in</p>
               <h2>Sign in to your account</h2>
               <label>Username<input name="username" required autocomplete="username" placeholder="your.username" /></label>
               <label>Password<input name="password" required type="password" autocomplete="current-password" placeholder="Your password" /></label>
-              <button type="submit">Sign in</button>
+              <div class="form-actions">
+                <button type="submit">Sign in</button>
+                <button id="forgotPasswordToggle" class="text-button" type="button">Forgot password?</button>
+              </div>
+            </form>
+            <form id="forgotPasswordForm" class="panel form-panel public-login-panel hidden">
+              <p class="eyebrow">Account recovery</p>
+              <h2>Request password help</h2>
+              <label>Username or phone<input name="requester" required autocomplete="username" placeholder="your.username or +251..." /></label>
+              <label>Account role
+                <select name="role" required>
+                  <option>Worker</option>
+                  <option>Employer</option>
+                  <option>Broker</option>
+                </select>
+              </label>
+              <label>Preferred contact<input name="contact" required placeholder="Phone or email for staff follow-up" /></label>
+              <div class="form-actions">
+                <button type="submit">Send request</button>
+                <button id="forgotPasswordCancel" class="secondary-button" type="button">Back to sign in</button>
+              </div>
             </form>
             <section id="accountDashboard" class="account-dashboard hidden" aria-label="Signed in account dashboard"></section>
             <div id="dynamicExperience" class="dynamic-experience"></div>
