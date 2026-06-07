@@ -188,10 +188,15 @@ function escapeHtml(value) {
 }
 
 async function request(path, options = {}) {
-  const response = await fetch(path, {
-    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
-    ...options,
-  });
+  let response;
+  try {
+    response = await fetch(path, {
+      headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+      ...options,
+    });
+  } catch {
+    throw new Error("Could not reach the backend. Start the server and refresh the page.");
+  }
   const payload = await response.json();
   if (!response.ok) {
     const message = payload.error || "Request failed";
@@ -210,9 +215,15 @@ function clearAdminSession() {
 
 async function validateAdminSession() {
   if (!state.adminToken) return;
-  const response = await fetch("/api/auth/session", {
-    headers: { "X-Admin-Token": state.adminToken },
-  });
+  let response;
+  try {
+    response = await fetch("/api/auth/session", {
+      headers: { "X-Admin-Token": state.adminToken },
+    });
+  } catch {
+    clearAdminSession();
+    return;
+  }
   if (!response.ok) {
     clearAdminSession();
     return;
