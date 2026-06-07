@@ -236,6 +236,15 @@ class BrokerHandler(BaseHTTPRequestHandler):
         self.send_response(204)
         self.end_headers()
 
+    def do_HEAD(self):
+        try:
+            route = urlparse(self.path).path
+            return self.static(route, include_body=False)
+        except ApiError as error:
+            return self.json({"error": error.message, **error.details}, error.status)
+        except Exception as error:
+            return self.json({"error": "Internal server error", "detail": str(error)}, 500)
+
     def do_GET(self):
         try:
             parsed = urlparse(self.path)
@@ -379,7 +388,7 @@ class BrokerHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(encoded)
 
-    def static(self, route):
+    def static(self, route, include_body=True):
         relative = route.lstrip("/") or "index.html"
         target = (FRONTEND_DIR / relative).resolve()
         if FRONTEND_DIR.resolve() not in target.parents and target != FRONTEND_DIR.resolve():
@@ -394,7 +403,8 @@ class BrokerHandler(BaseHTTPRequestHandler):
         self.send_header("Cache-Control", "no-store" if target.name.endswith((".html", ".js", ".css")) else "public, max-age=86400")
         self.send_header("Content-Length", str(len(data)))
         self.end_headers()
-        self.wfile.write(data)
+        if include_body:
+            self.wfile.write(data)
 
     def filter_users(self, query):
         role = query.get("role", [""])[0]

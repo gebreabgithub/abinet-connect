@@ -322,7 +322,7 @@ main {
   color: white;
   background:
     linear-gradient(105deg, rgba(15, 23, 42, 0.95), rgba(15, 118, 110, 0.76)),
-    url("/assets/workforce-market.png");
+    url("assets/workforce-market.png");
   background-size: cover;
   background-position: center;
   box-shadow: var(--shadow);
@@ -339,7 +339,7 @@ main {
   color: white;
   background:
     linear-gradient(110deg, rgba(15, 23, 42, 0.96), rgba(29, 78, 216, 0.62)),
-    url("/assets/workforce-market.png");
+    url("assets/workforce-market.png");
   background-size: cover;
   background-position: center;
   box-shadow: var(--shadow);
@@ -359,28 +359,28 @@ main {
 .employer-banner {
   background:
     linear-gradient(110deg, rgba(15, 23, 42, 0.96), rgba(22, 101, 52, 0.66)),
-    url("/assets/workforce-market.png");
+    url("assets/workforce-market.png");
   background-size: cover;
 }
 
 .employee-banner {
   background:
     linear-gradient(110deg, rgba(15, 23, 42, 0.96), rgba(15, 118, 110, 0.68)),
-    url("/assets/workforce-market.png");
+    url("assets/workforce-market.png");
   background-size: cover;
 }
 
 .broker-banner {
   background:
     linear-gradient(110deg, rgba(15, 23, 42, 0.96), rgba(180, 83, 9, 0.66)),
-    url("/assets/workforce-market.png");
+    url("assets/workforce-market.png");
   background-size: cover;
 }
 
 .support-banner {
   background:
     linear-gradient(110deg, rgba(15, 23, 42, 0.96), rgba(185, 28, 28, 0.58)),
-    url("/assets/workforce-market.png");
+    url("assets/workforce-market.png");
   background-size: cover;
 }
 
@@ -486,7 +486,7 @@ main {
   inset: 0;
   background:
     linear-gradient(145deg, rgba(15, 23, 42, 0.12), rgba(15, 23, 42, 0.78)),
-    url("/assets/workforce-market.png");
+    url("assets/workforce-market.png");
   background-size: cover;
   background-position: center;
   transition: transform 180ms ease;
@@ -533,21 +533,21 @@ main {
 .employee-card::before {
   background:
     linear-gradient(145deg, rgba(15, 23, 42, 0.12), rgba(15, 118, 110, 0.82)),
-    url("/assets/workforce-market.png");
+    url("assets/workforce-market.png");
   background-size: cover;
 }
 
 .broker-card::before {
   background:
     linear-gradient(145deg, rgba(15, 23, 42, 0.12), rgba(180, 83, 9, 0.82)),
-    url("/assets/workforce-market.png");
+    url("assets/workforce-market.png");
   background-size: cover;
 }
 
 .admin-card::before {
   background:
     linear-gradient(145deg, rgba(15, 23, 42, 0.1), rgba(29, 78, 216, 0.84)),
-    url("/assets/workforce-market.png");
+    url("assets/workforce-market.png");
   background-size: cover;
 }
 

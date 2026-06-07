@@ -1,12 +1,12 @@
-const CACHE_NAME = "abinet-connect-v3";
+const CACHE_NAME = "abinet-connect-v4-cssfix";
 const APP_SHELL = [
-  "/",
-  "/index.html",
-  "/styles.css",
-  "/app.js",
-  "/manifest.webmanifest",
-  "/assets/icon.svg",
-  "/assets/workforce-market.png"
+  "./",
+  "index.html",
+  "styles.css",
+  "app.js",
+  "manifest.webmanifest",
+  "assets/icon.svg",
+  "assets/workforce-market.png"
 ];
 
 self.addEventListener("install", (event) => {
@@ -39,7 +39,7 @@ self.addEventListener("fetch", (event) => {
     }).catch(() => {
       return caches.match(event.request).then((cached) => {
         if (cached) return cached;
-        return caches.match("/");
+        return caches.match("./");
       });
     })
   );
