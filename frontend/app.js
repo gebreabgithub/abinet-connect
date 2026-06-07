@@ -1087,7 +1087,7 @@ function showPage() {
   document.querySelectorAll("[data-page-link]").forEach((link) => {
     link.classList.toggle("active", link.dataset.pageLink === page);
   });
-  qs("#pageTitle").textContent = pageTitles[page];
+  qs("#pageTitle").textContent = page === "admin" && state.adminToken ? "Operations workspace" : pageTitles[page];
   updatePublicAuthControls();
   updateAdminGate();
   if (window.location.hash !== `#${page}`) {
@@ -1105,6 +1105,9 @@ function updateAdminGate() {
   const sessionInfo = qs("#staffSessionInfo");
   if (identity) identity.textContent = state.currentUser ? `${state.currentUser.name} · ${state.currentUser.role}` : "Signed in";
   if (sessionInfo) sessionInfo.textContent = state.currentUser ? `${state.currentUser.country || "Global"} staff access` : "Secure staff session";
+  if (currentPage() === "admin") {
+    qs("#pageTitle").textContent = state.adminToken ? "Operations workspace" : "Admin access";
+  }
   const capabilities = new Set(staffCapabilities[state.currentUser?.role] || []);
   document.querySelectorAll("[data-staff-tool]").forEach((element) => {
     element.classList.toggle("locked-area", !capabilities.has(element.dataset.staffTool));

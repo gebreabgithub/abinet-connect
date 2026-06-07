@@ -53,6 +53,15 @@ button:hover {
   box-shadow: 0 8px 20px rgba(22, 101, 52, 0.16);
 }
 
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(29, 78, 216, 0.28);
+  outline-offset: 2px;
+}
+
 .secondary-button {
   color: var(--ink);
   background: #e2e8f0;
@@ -453,6 +462,24 @@ main {
   box-shadow: var(--shadow-soft);
 }
 
+.role-card::after {
+  content: "";
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  min-height: 28px;
+  padding: 5px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  color: transparent;
+  background: rgba(15, 23, 42, 0.2);
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity 160ms ease, color 160ms ease;
+}
+
 .role-card::before {
   content: "";
   position: absolute;
@@ -477,6 +504,12 @@ main {
 .role-card.selected {
   outline: 3px solid rgba(34, 197, 94, 0.38);
   box-shadow: 0 18px 40px rgba(22, 101, 52, 0.15);
+}
+
+.role-card.selected::after {
+  content: "Selected";
+  color: #fff;
+  opacity: 1;
 }
 
 .role-card span {
@@ -1284,6 +1317,17 @@ main {
     flex-direction: column;
   }
 
+  .topbar {
+    gap: 12px;
+    padding: 12px 16px;
+  }
+
+  .topbar h1 {
+    margin-top: 2px;
+    font-size: 1.18rem;
+    line-height: 1.15;
+  }
+
   .topbar-actions,
   .filter-bar,
   .metric-grid,
@@ -1300,6 +1344,8 @@ main {
 
   .topbar-actions {
     display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
   }
 
   .topbar-actions button {
@@ -1307,6 +1353,7 @@ main {
   }
 
   .session-badge {
+    grid-column: 1 / -1;
     max-width: none;
     justify-content: center;
   }
@@ -1371,7 +1418,27 @@ main {
   }
 
   .hero-panel {
-    min-height: 360px;
+    min-height: auto;
+    gap: 18px;
+    padding: 20px;
+  }
+
+  .hero-panel h2 {
+    font-size: 1.65rem;
+  }
+
+  .hero-panel p:not(.eyebrow) {
+    font-size: 0.94rem;
+  }
+
+  .hero-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hero-metrics article {
+    display: grid;
+    align-content: start;
+    min-height: 86px;
   }
 
   .role-card {
