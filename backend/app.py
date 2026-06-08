@@ -45,10 +45,10 @@ STAFF_MFA_REQUIRED = os.environ.get("STAFF_MFA_REQUIRED", "0") == "1"
 STAFF_MFA_CODE = os.environ.get("STAFF_MFA_CODE", "")
 
 STAFF_CAPABILITIES = {
-    "MasterAdmin": {"staff", "category", "verification", "applications", "support", "finance", "compliance", "audit", "settings"},
-    "CountryAdmin": {"staff", "category", "verification", "applications", "support", "finance", "compliance", "audit"},
-    "RegionalManager": {"verification", "applications", "support", "audit"},
-    "VerificationOfficer": {"verification", "applications"},
+    "MasterAdmin": {"staff", "category", "verification", "applications", "support", "finance", "compliance", "audit", "settings", "talent"},
+    "CountryAdmin": {"staff", "category", "verification", "applications", "support", "finance", "compliance", "audit", "talent"},
+    "RegionalManager": {"verification", "applications", "support", "audit", "talent"},
+    "VerificationOfficer": {"verification", "applications", "talent"},
     "SupportAgent": {"support", "applications"},
     "FinanceOfficer": {"finance", "applications"},
     "ComplianceOfficer": {"compliance", "audit"},
@@ -144,6 +144,10 @@ def public_bootstrap(data):
         "complianceRequests": data.get("complianceRequests", []),
         "safetyReports": data.get("safetyReports", []),
         "payments": data.get("payments", []),
+        "talents": data.get("talents", []),
+        "talentOpportunities": data.get("talentOpportunities", []),
+        "talentMatches": build_talent_matches(data),
+        "successStories": data.get("successStories", []),
         "fraudAlerts": data.get("fraudAlerts", []),
         "auditLog": data.get("auditLog", [])[-12:],
         "stats": build_stats(data),
@@ -182,7 +186,47 @@ def build_stats(data):
         "payments": len(data.get("payments", [])),
         "safetyReports": len(data.get("safetyReports", [])),
         "complianceRequests": len(data.get("complianceRequests", [])),
+        "talents": len(data.get("talents", [])),
+        "talentOpportunities": len(data.get("talentOpportunities", [])),
+        "successStories": len(data.get("successStories", [])),
     }
+
+
+def build_talent_matches(data):
+    talents = [item for item in data.get("talents", []) if item.get("status") == "Approved"]
+    opportunities = [item for item in data.get("talentOpportunities", []) if item.get("status") == "Published"]
+    matches = []
+    for talent in talents:
+        talent_skills = {item.lower() for item in talent.get("skills", [])}
+        for opportunity in opportunities:
+            score = 0
+            reasons = []
+            if talent.get("category") == opportunity.get("category"):
+                score += 40
+                reasons.append("category")
+            required = {item.lower() for item in opportunity.get("skills", [])}
+            overlap = sorted(talent_skills & required)
+            if overlap:
+                score += min(35, len(overlap) * 12)
+                reasons.append("skills")
+            if has_text(talent.get("education"), opportunity.get("educationLevel")) or not opportunity.get("educationLevel"):
+                score += 15
+                reasons.append("education")
+            if talent.get("verificationLevel") in {"Achievement Verified", "Elite Talent"}:
+                score += 10
+                reasons.append("verified achievement")
+            if score >= 35:
+                matches.append({
+                    "id": f"match-{talent.get('id')}-{opportunity.get('id')}",
+                    "talentId": talent.get("id"),
+                    "talentName": talent.get("name"),
+                    "opportunityId": opportunity.get("id"),
+                    "opportunityTitle": opportunity.get("title"),
+                    "provider": opportunity.get("provider"),
+                    "score": min(score, 100),
+                    "reasons": reasons,
+                })
+    return sorted(matches, key=lambda item: item["score"], reverse=True)[:30]
 
 
 def audit(data, actor, action, subject):
@@ -296,6 +340,14 @@ class BrokerHandler(BaseHTTPRequestHandler):
                 if user.get("role") in STAFF_ROLES:
                     self.require_staff_capability("finance")
                 return self.json(store.read().get("payments", []))
+            if route == "/api/talents":
+                return self.json(store.read().get("talents", []))
+            if route == "/api/talent-opportunities":
+                return self.json(store.read().get("talentOpportunities", []))
+            if route == "/api/talent-matches":
+                return self.json(build_talent_matches(store.read()))
+            if route == "/api/success-stories":
+                return self.json(store.read().get("successStories", []))
             if route == "/api/admin/verification-queue":
                 self.require_staff_capability("verification")
                 workers = [worker for worker in store.read().get("workers", []) if not worker.get("verified")]
@@ -339,6 +391,13 @@ class BrokerHandler(BaseHTTPRequestHandler):
                 return self.json(self.create_safety_report(body), 201)
             if route == "/api/payments":
                 return self.json(self.create_payment(body), 201)
+            if route == "/api/talents":
+                return self.json(self.create_talent(body), 201)
+            if route == "/api/talent-opportunities":
+                return self.json(self.create_talent_opportunity(body), 201)
+            if route == "/api/success-stories":
+                self.require_staff_capability("talent")
+                return self.json(self.create_success_story(body), 201)
             return self.json({"error": "Route not found"}, 404)
         except ApiError as error:
             return self.json({"error": error.message, **error.details}, error.status)
@@ -364,6 +423,12 @@ class BrokerHandler(BaseHTTPRequestHandler):
             if len(parts) == 4 and parts[:2] == ["api", "users"] and parts[3] == "profile":
                 user = self.require_session()
                 return self.json(self.update_profile(user, parts[2], body))
+            if len(parts) == 4 and parts[:2] == ["api", "talents"] and parts[3] == "status":
+                self.require_staff_capability("talent")
+                return self.json(self.update_talent_status(parts[2], body))
+            if len(parts) == 4 and parts[:2] == ["api", "talent-opportunities"] and parts[3] == "status":
+                self.require_staff_capability("talent")
+                return self.json(self.update_talent_opportunity_status(parts[2], body))
             return self.json({"error": "Route not found"}, 404)
         except ApiError as error:
             return self.json({"error": error.message, **error.details}, error.status)
@@ -930,6 +995,133 @@ class BrokerHandler(BaseHTTPRequestHandler):
             data.setdefault("payments", []).insert(0, item)
             audit(data, "Finance Desk", "created payment record", item["invoiceNumber"])
             return item
+
+        return store.update(mutate)
+
+    def create_talent(self, body):
+        name = str(body.get("name", "")).strip()
+        contact = str(body.get("contact", "")).strip()
+        category = str(body.get("category", "")).strip()
+        education = str(body.get("education", "")).strip()
+        skills = parse_list(body.get("skills"))
+        achievements = str(body.get("achievements", "")).strip()
+        evidence = str(body.get("evidence", "")).strip()
+        country = str(body.get("country", "Ethiopia")).strip() or "Ethiopia"
+        if not name or not contact or not category or not skills:
+            raise ApiError("Talent name, contact, category, and skills are required", 400)
+
+        def mutate(data):
+            item = {
+                "id": make_id("talent"),
+                "name": name,
+                "contact": contact,
+                "category": category,
+                "education": education,
+                "skills": skills,
+                "achievements": achievements,
+                "evidence": evidence,
+                "country": country,
+                "status": "Pending Review",
+                "verificationLevel": "Submitted",
+                "readiness": "Needs review",
+                "createdAt": now_ms(),
+            }
+            data.setdefault("talents", []).insert(0, item)
+            audit(data, "Talent Network", "submitted talent", name)
+            return item
+
+        return store.update(mutate)
+
+    def create_talent_opportunity(self, body):
+        provider = str(body.get("provider", "")).strip()
+        title = str(body.get("title", "")).strip()
+        opportunity_type = str(body.get("opportunityType", "")).strip()
+        category = str(body.get("category", "")).strip()
+        country = str(body.get("country", "International")).strip() or "International"
+        deadline = str(body.get("deadline", "")).strip()
+        education_level = str(body.get("educationLevel", "")).strip()
+        skills = parse_list(body.get("skills"))
+        eligibility = str(body.get("eligibility", "")).strip()
+        if not provider or not title or not opportunity_type or not category:
+            raise ApiError("Provider, title, opportunity type, and category are required", 400)
+
+        def mutate(data):
+            item = {
+                "id": make_id("opp"),
+                "provider": provider,
+                "title": title,
+                "opportunityType": opportunity_type,
+                "category": category,
+                "country": country,
+                "deadline": deadline,
+                "educationLevel": education_level,
+                "skills": skills,
+                "eligibility": eligibility,
+                "status": "Pending Review",
+                "createdAt": now_ms(),
+            }
+            data.setdefault("talentOpportunities", []).insert(0, item)
+            audit(data, "Talent Network", "submitted opportunity", title)
+            return item
+
+        return store.update(mutate)
+
+    def create_success_story(self, body):
+        talent_name = str(body.get("talentName", "")).strip()
+        outcome = str(body.get("outcome", "")).strip()
+        opportunity = str(body.get("opportunity", "")).strip()
+        story = str(body.get("story", "")).strip()
+        if not talent_name or not outcome:
+            raise ApiError("Talent name and outcome are required", 400)
+
+        def mutate(data):
+            item = {
+                "id": make_id("story"),
+                "talentName": talent_name,
+                "outcome": outcome,
+                "opportunity": opportunity,
+                "story": story,
+                "status": "Published",
+                "createdAt": now_ms(),
+            }
+            data.setdefault("successStories", []).insert(0, item)
+            audit(data, "Talent Network", "published success story", talent_name)
+            return item
+
+        return store.update(mutate)
+
+    def update_talent_status(self, talent_id, body):
+        status = str(body.get("status", "Approved")).strip()
+        level = str(body.get("verificationLevel", "Basic Verified")).strip()
+        if status not in {"Pending Review", "Approved", "Correction Required", "Rejected"}:
+            raise ApiError("Invalid talent status", 400)
+        if level not in {"Submitted", "Basic Verified", "Skill Verified", "Achievement Verified", "Elite Talent"}:
+            raise ApiError("Invalid verification level", 400)
+
+        def mutate(data):
+            for item in data.get("talents", []):
+                if item.get("id") == talent_id:
+                    item["status"] = status
+                    item["verificationLevel"] = level
+                    item["readiness"] = "Opportunity ready" if status == "Approved" else "Needs update"
+                    audit(data, "Talent Admin", "updated talent", item.get("name", talent_id))
+                    return copy.deepcopy(item)
+            raise ApiError("Talent profile not found", 404)
+
+        return store.update(mutate)
+
+    def update_talent_opportunity_status(self, opportunity_id, body):
+        status = str(body.get("status", "Published")).strip()
+        if status not in {"Pending Review", "Published", "Correction Required", "Closed", "Rejected"}:
+            raise ApiError("Invalid opportunity status", 400)
+
+        def mutate(data):
+            for item in data.get("talentOpportunities", []):
+                if item.get("id") == opportunity_id:
+                    item["status"] = status
+                    audit(data, "Talent Admin", "updated opportunity", item.get("title", opportunity_id))
+                    return copy.deepcopy(item)
+            raise ApiError("Opportunity not found", 404)
 
         return store.update(mutate)
 

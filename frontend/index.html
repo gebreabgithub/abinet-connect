@@ -8,7 +8,7 @@
     <title>Abinet Connect</title>
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="styles.css?v=20260608-talent" />
+    <link rel="stylesheet" href="styles.css?v=20260608-talent-functional" />
   </head>
   <body>
     <div class="app-shell">
@@ -131,6 +131,98 @@
               <article><span>03</span><strong>Develop Talent</strong><small>Assessment, gap detection, mentoring, training, and portfolio improvement.</small></article>
               <article><span>04</span><strong>Match Opportunity</strong><small>Category, skills, education, achievement, and readiness ranking.</small></article>
               <article><span>05</span><strong>Track Success</strong><small>Confirmed outcomes become public stories and partner proof.</small></article>
+            </div>
+
+            <div class="talent-action-grid">
+              <form id="talentProfileForm" class="panel form-panel">
+                <p class="eyebrow">Talent intake</p>
+                <h2>Register talent profile</h2>
+                <label>Full name<input name="name" required placeholder="Talent full name" /></label>
+                <label>Contact<input name="contact" required placeholder="Phone or email" /></label>
+                <label>Category
+                  <select name="category" required>
+                    <option>High-Tech Talent</option>
+                    <option>Entrepreneurs</option>
+                    <option>Scholarship Seekers</option>
+                    <option>Researchers</option>
+                    <option>Special Talent</option>
+                    <option>Big Achievers</option>
+                    <option>Creative Talent</option>
+                    <option>Community Leaders</option>
+                  </select>
+                </label>
+                <label>Country<input name="country" placeholder="Ethiopia or international" /></label>
+                <label>Education<input name="education" placeholder="Degree, school, field, or current level" /></label>
+                <label>Skills<input name="skills" required placeholder="AI, robotics, research, leadership" /></label>
+                <label>Achievements<textarea name="achievements" rows="3" placeholder="Awards, projects, publications, impact"></textarea></label>
+                <label>Evidence links<textarea name="evidence" rows="3" placeholder="Portfolio, certificates, GitHub, LinkedIn, documents"></textarea></label>
+                <button type="submit">Submit talent</button>
+              </form>
+
+              <form id="talentOpportunityForm" class="panel form-panel">
+                <p class="eyebrow">Opportunity intake</p>
+                <h2>Post opportunity</h2>
+                <label>Provider / organization<input name="provider" required placeholder="University, company, fund, lab" /></label>
+                <label>Opportunity title<input name="title" required placeholder="Scholarship, research role, startup grant" /></label>
+                <label>Opportunity type
+                  <select name="opportunityType" required>
+                    <option>Scholarship</option>
+                    <option>Job</option>
+                    <option>Internship</option>
+                    <option>Research Position</option>
+                    <option>Startup Funding</option>
+                    <option>Competition</option>
+                    <option>Mentorship</option>
+                    <option>Training Program</option>
+                  </select>
+                </label>
+                <label>Category<input name="category" required placeholder="High-Tech Talent, Researchers..." /></label>
+                <label>Country<input name="country" placeholder="Ethiopia, USA, Germany, Remote" /></label>
+                <label>Deadline<input name="deadline" placeholder="2026-09-30 or rolling" /></label>
+                <label>Education level<input name="educationLevel" placeholder="Bachelor, MSc, PhD, high school" /></label>
+                <label>Required skills<input name="skills" placeholder="AI, Python, biotech, business" /></label>
+                <label>Eligibility<textarea name="eligibility" rows="3" placeholder="Who can apply and what evidence is required"></textarea></label>
+                <button type="submit">Submit opportunity</button>
+              </form>
+            </div>
+
+            <div class="talent-live-grid">
+              <section class="panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Talent database</p>
+                    <h2>Submitted talent profiles</h2>
+                  </div>
+                </div>
+                <div id="talentProfileList" class="stack-list"></div>
+              </section>
+              <section class="panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Opportunity board</p>
+                    <h2>Provider opportunities</h2>
+                  </div>
+                </div>
+                <div id="talentOpportunityList" class="stack-list"></div>
+              </section>
+              <section class="panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Matching engine</p>
+                    <h2>Recommended matches</h2>
+                  </div>
+                </div>
+                <div id="talentMatchList" class="stack-list"></div>
+              </section>
+              <section class="panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Success tracking</p>
+                    <h2>Published stories</h2>
+                  </div>
+                </div>
+                <div id="successStoryList" class="stack-list"></div>
+              </section>
             </div>
 
             <div class="talent-grid">
@@ -711,6 +803,6 @@
     </div>
 
     <div id="toast" role="status" aria-live="polite"></div>
-    <script src="app.js?v=20260608-talent"></script>
+    <script src="app.js?v=20260608-talent-functional"></script>
   </body>
 </html>

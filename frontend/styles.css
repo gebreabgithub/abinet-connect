@@ -728,6 +728,24 @@ main {
   gap: 16px;
 }
 
+.talent-action-grid,
+.talent-live-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.talent-action-grid .form-panel {
+  border-color: rgba(29, 78, 216, 0.2);
+  box-shadow: 0 16px 38px rgba(29, 78, 216, 0.07);
+}
+
+.talent-live-grid .stack-list {
+  max-height: 520px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
 .talent-panel {
   padding: 18px;
 }
@@ -1570,6 +1588,8 @@ main {
   .metric-grid,
   .dashboard-grid,
   .talent-grid,
+  .talent-action-grid,
+  .talent-live-grid,
   .talent-stage-flow,
   .role-picker,
   .account-status-grid,

@@ -14,6 +14,10 @@ const state = {
   complianceRequests: [],
   safetyReports: [],
   payments: [],
+  talents: [],
+  talentOpportunities: [],
+  talentMatches: [],
+  successStories: [],
   stats: {},
   selectedRole: "employer",
   adminToken: readStoredAdminToken(),
@@ -668,6 +672,147 @@ function renderApplicationQueue() {
   });
 }
 
+function talentStatusClass(status) {
+  if (["Approved", "Published"].includes(status)) return "good";
+  if (["Correction Required", "Pending Review"].includes(status)) return "warn";
+  if (["Rejected", "Closed"].includes(status)) return "danger";
+  return "";
+}
+
+function renderTalentNetwork() {
+  const talentList = qs("#talentProfileList");
+  const opportunityList = qs("#talentOpportunityList");
+  const matchList = qs("#talentMatchList");
+  const storyList = qs("#successStoryList");
+  if (!talentList || !opportunityList || !matchList || !storyList) return;
+
+  const talents = state.talents || [];
+  const opportunities = state.talentOpportunities || [];
+  const matches = state.talentMatches || [];
+  const stories = state.successStories || [];
+  const canReview = Boolean(state.adminToken && staffCapabilities[state.currentUser?.role]?.includes("talent"));
+
+  talentList.innerHTML = talents.map((talent) => `
+    <article class="record">
+      <div>
+        <strong>${escapeHtml(talent.name)}</strong>
+        <span>${escapeHtml(talent.category)} · ${escapeHtml(talent.country || "International")} · ${escapeHtml(talent.education || "Education pending")}</span>
+      </div>
+      <div class="chips">${(talent.skills || []).slice(0, 5).map((skill) => `<span>${escapeHtml(skill)}</span>`).join("")}</div>
+      <footer>
+        <span class="badge ${talentStatusClass(talent.status)}">${escapeHtml(talent.verificationLevel || talent.status)}</span>
+        ${canReview ? `<div class="queue-actions">
+          <button class="small-button" data-talent-approve="${escapeHtml(talent.id)}" type="button">Approve</button>
+          <button class="small-button secondary-button" data-talent-correction="${escapeHtml(talent.id)}" type="button">Correction</button>
+        </div>` : `<span>${escapeHtml(talent.readiness || "Submitted")}</span>`}
+      </footer>
+    </article>
+  `).join("") || `<div class="empty-state">No talent profiles submitted yet.</div>`;
+
+  opportunityList.innerHTML = opportunities.map((opportunity) => `
+    <article class="record">
+      <div>
+        <strong>${escapeHtml(opportunity.title)}</strong>
+        <span>${escapeHtml(opportunity.provider)} · ${escapeHtml(opportunity.opportunityType)} · ${escapeHtml(opportunity.country || "International")}</span>
+      </div>
+      <div class="chips">${(opportunity.skills || []).slice(0, 5).map((skill) => `<span>${escapeHtml(skill)}</span>`).join("")}</div>
+      <footer>
+        <span class="badge ${talentStatusClass(opportunity.status)}">${escapeHtml(opportunity.status)}</span>
+        ${canReview ? `<div class="queue-actions">
+          <button class="small-button" data-opportunity-publish="${escapeHtml(opportunity.id)}" type="button">Publish</button>
+          <button class="small-button secondary-button" data-opportunity-correction="${escapeHtml(opportunity.id)}" type="button">Correction</button>
+        </div>` : `<span>${escapeHtml(opportunity.deadline || "Rolling deadline")}</span>`}
+      </footer>
+    </article>
+  `).join("") || `<div class="empty-state">No opportunities posted yet.</div>`;
+
+  matchList.innerHTML = matches.map((match) => `
+    <article class="record">
+      <div>
+        <strong>${escapeHtml(match.talentName)} → ${escapeHtml(match.opportunityTitle)}</strong>
+        <span>${escapeHtml(match.provider)} · ${escapeHtml((match.reasons || []).join(", ") || "profile match")}</span>
+      </div>
+      <footer>
+        <span class="badge good">${escapeHtml(match.score)}% match</span>
+      </footer>
+    </article>
+  `).join("") || `<div class="empty-state">Approve talent profiles and publish opportunities to generate matches.</div>`;
+
+  storyList.innerHTML = stories.map((story) => `
+    <article class="record">
+      <div>
+        <strong>${escapeHtml(story.talentName)} · ${escapeHtml(story.outcome)}</strong>
+        <span>${escapeHtml(story.opportunity || "Opportunity confirmed")}</span>
+      </div>
+      <p>${escapeHtml(story.story || "Success record published.")}</p>
+    </article>
+  `).join("") || `<div class="empty-state">No success stories published yet.</div>`;
+
+  document.querySelectorAll("[data-talent-approve]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      try {
+        await request(`/api/talents/${button.dataset.talentApprove}/status`, {
+          method: "PATCH",
+          headers: { "X-Admin-Token": state.adminToken },
+          body: JSON.stringify({ status: "Approved", verificationLevel: "Skill Verified" }),
+        });
+        toast("Talent approved.");
+        await loadAll();
+      } catch (error) {
+        toast(error.message, "error");
+      }
+    });
+  });
+
+  document.querySelectorAll("[data-talent-correction]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      try {
+        await request(`/api/talents/${button.dataset.talentCorrection}/status`, {
+          method: "PATCH",
+          headers: { "X-Admin-Token": state.adminToken },
+          body: JSON.stringify({ status: "Correction Required", verificationLevel: "Submitted" }),
+        });
+        toast("Talent correction requested.");
+        await loadAll();
+      } catch (error) {
+        toast(error.message, "error");
+      }
+    });
+  });
+
+  document.querySelectorAll("[data-opportunity-publish]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      try {
+        await request(`/api/talent-opportunities/${button.dataset.opportunityPublish}/status`, {
+          method: "PATCH",
+          headers: { "X-Admin-Token": state.adminToken },
+          body: JSON.stringify({ status: "Published" }),
+        });
+        toast("Opportunity published.");
+        await loadAll();
+      } catch (error) {
+        toast(error.message, "error");
+      }
+    });
+  });
+
+  document.querySelectorAll("[data-opportunity-correction]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      try {
+        await request(`/api/talent-opportunities/${button.dataset.opportunityCorrection}/status`, {
+          method: "PATCH",
+          headers: { "X-Admin-Token": state.adminToken },
+          body: JSON.stringify({ status: "Correction Required" }),
+        });
+        toast("Opportunity correction requested.");
+        await loadAll();
+      } catch (error) {
+        toast(error.message, "error");
+      }
+    });
+  });
+}
+
 function renderTickets() {
   qs("#ticketList").innerHTML = state.supportTickets.map((ticket) => `
     <article class="record">
@@ -1076,6 +1221,7 @@ function renderAll() {
   renderAudit();
   renderAdminRecords();
   renderRoleDashboards();
+  renderTalentNetwork();
 }
 
 function currentPage() {
@@ -1451,6 +1597,59 @@ function wireForms() {
       qs("#forgotPasswordForm").classList.add("hidden");
       qs("#publicLoginForm").classList.remove("hidden");
       toast("Password help request sent. Staff will verify your identity before resetting it.");
+      await loadAll();
+    } catch (error) {
+      toast(error.message, "error");
+    }
+  });
+
+  qs("#talentProfileForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
+    try {
+      await request("/api/talents", {
+        method: "POST",
+        body: JSON.stringify({
+          name: form.get("name"),
+          contact: form.get("contact"),
+          category: form.get("category"),
+          country: form.get("country"),
+          education: form.get("education"),
+          skills: splitList(form.get("skills") || ""),
+          achievements: form.get("achievements"),
+          evidence: form.get("evidence"),
+        }),
+      });
+      formElement.reset();
+      toast("Talent profile submitted for review.");
+      await loadAll();
+    } catch (error) {
+      toast(error.message, "error");
+    }
+  });
+
+  qs("#talentOpportunityForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
+    try {
+      await request("/api/talent-opportunities", {
+        method: "POST",
+        body: JSON.stringify({
+          provider: form.get("provider"),
+          title: form.get("title"),
+          opportunityType: form.get("opportunityType"),
+          category: form.get("category"),
+          country: form.get("country"),
+          deadline: form.get("deadline"),
+          educationLevel: form.get("educationLevel"),
+          skills: splitList(form.get("skills") || ""),
+          eligibility: form.get("eligibility"),
+        }),
+      });
+      formElement.reset();
+      toast("Opportunity submitted for review.");
       await loadAll();
     } catch (error) {
       toast(error.message, "error");
