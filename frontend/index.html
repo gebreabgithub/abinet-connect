@@ -8,7 +8,7 @@
     <title>Abinet Connect</title>
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="styles.css?v=20260607-cssfix" />
+    <link rel="stylesheet" href="styles.css?v=20260608-talent" />
   </head>
   <body>
     <div class="app-shell">
@@ -20,6 +20,11 @@
             <small>Employment platform</small>
           </span>
         </a>
+        <nav aria-label="Main pages">
+          <a href="#overview" data-page-link="overview">Marketplace</a>
+          <a href="#talent" data-page-link="talent">Talent Network</a>
+          <a href="#support" data-page-link="support">Support</a>
+        </nav>
 
         <div class="sidebar-card">
           <span class="pulse"></span>
@@ -105,6 +110,131 @@
             <section id="accountDashboard" class="account-dashboard hidden" aria-label="Signed in account dashboard"></section>
             <div id="dynamicExperience" class="dynamic-experience"></div>
             <div class="metric-grid" id="metricGrid" aria-label="Platform metrics"></div>
+          </section>
+
+          <section id="talent" class="page talent-page" data-page="talent">
+            <div class="talent-hero">
+              <div>
+                <p class="eyebrow">Talent & Opportunity Network</p>
+                <h2>Discover hidden talent, verify potential, develop readiness, and connect people to life-changing opportunities.</h2>
+                <p>The network expands Abinet Connect beyond employment into scholarships, research, startups, competitions, mentorship, training, and national or international opportunity matching.</p>
+              </div>
+              <div class="talent-hero-actions">
+                <a class="button-link" href="#employee">Register Talent</a>
+                <a class="button-link secondary-link" href="#employer">Post Opportunity</a>
+              </div>
+            </div>
+
+            <div class="talent-stage-flow" aria-label="Talent network architecture stages">
+              <article><span>01</span><strong>Discover Talent</strong><small>Public registration, referrals, and success-story discovery.</small></article>
+              <article><span>02</span><strong>Verify Talent</strong><small>Identity, education, skill, and achievement evidence review.</small></article>
+              <article><span>03</span><strong>Develop Talent</strong><small>Assessment, gap detection, mentoring, training, and portfolio improvement.</small></article>
+              <article><span>04</span><strong>Match Opportunity</strong><small>Category, skills, education, achievement, and readiness ranking.</small></article>
+              <article><span>05</span><strong>Track Success</strong><small>Confirmed outcomes become public stories and partner proof.</small></article>
+            </div>
+
+            <div class="talent-grid">
+              <article class="talent-panel">
+                <p class="eyebrow">Main users</p>
+                <h2>Who enters the network</h2>
+                <div class="mini-flow">
+                  <span>Public Visitor</span><b>Register as Talent</b><b>Register as Provider</b><b>Explore Success Stories</b>
+                  <span>Talent Profile</span><span>Provider Profile</span>
+                </div>
+              </article>
+
+              <article class="talent-panel">
+                <p class="eyebrow">Talent categories</p>
+                <h2>Talent the system should discover</h2>
+                <div class="pill-list">
+                  <span>High-Tech Talent</span><span>Entrepreneurs</span><span>Scholarship Seekers</span><span>Researchers</span>
+                  <span>Special Talent</span><span>Big Achievers</span><span>Creative Talent</span><span>Community Leaders</span>
+                </div>
+              </article>
+
+              <article class="talent-panel">
+                <p class="eyebrow">Registration flow</p>
+                <h2>From basic profile to review</h2>
+                <ol class="flow-list">
+                  <li>Basic personal information</li>
+                  <li>Select talent category</li>
+                  <li>Add education background</li>
+                  <li>Add skills and achievements</li>
+                  <li>Upload evidence</li>
+                  <li>Submit for profile review</li>
+                </ol>
+              </article>
+
+              <article class="talent-panel">
+                <p class="eyebrow">Opportunity providers</p>
+                <h2>Organizations post reviewed opportunities</h2>
+                <ol class="flow-list">
+                  <li>Register organization information</li>
+                  <li>Complete provider verification</li>
+                  <li>Post opportunity</li>
+                  <li>Admin opportunity review</li>
+                  <li>Publish or request correction</li>
+                </ol>
+              </article>
+
+              <article class="talent-panel wide-panel">
+                <p class="eyebrow">Opportunity types</p>
+                <h2>What the platform can match</h2>
+                <div class="opportunity-types">
+                  <span>Scholarships</span><span>Jobs</span><span>Internships</span><span>Research Positions</span>
+                  <span>Startup Funding</span><span>Competitions</span><span>Mentorship</span><span>Training Programs</span>
+                </div>
+              </article>
+
+              <article class="talent-panel">
+                <p class="eyebrow">Matching engine</p>
+                <h2>How candidates are ranked</h2>
+                <ol class="flow-list">
+                  <li>Check category match</li>
+                  <li>Check skills match</li>
+                  <li>Check education level</li>
+                  <li>Check achievement level</li>
+                  <li>Rank best candidates</li>
+                  <li>Notify talent and provider</li>
+                </ol>
+              </article>
+
+              <article class="talent-panel">
+                <p class="eyebrow">Verification levels</p>
+                <h2>Trust ladder</h2>
+                <div class="level-ladder">
+                  <span>Basic Verified</span><span>Skill Verified</span><span>Achievement Verified</span><span>Elite Talent</span>
+                </div>
+              </article>
+
+              <article class="talent-panel">
+                <p class="eyebrow">Development flow</p>
+                <h2>Build readiness before matching</h2>
+                <ol class="flow-list">
+                  <li>Profile assessment</li>
+                  <li>Identify gaps</li>
+                  <li>Recommend training</li>
+                  <li>Mentorship</li>
+                  <li>Portfolio improvement</li>
+                  <li>Opportunity readiness</li>
+                </ol>
+              </article>
+
+              <article class="talent-panel">
+                <p class="eyebrow">Admin management</p>
+                <h2>Control center responsibilities</h2>
+                <div class="pill-list compact">
+                  <span>Review Profiles</span><span>Review Providers</span><span>Approve Opportunities</span>
+                  <span>Monitor Applications</span><span>Manage Categories</span><span>Track Stories</span>
+                </div>
+              </article>
+
+              <article class="talent-panel wide-panel success-panel">
+                <p class="eyebrow">Long-term vision</p>
+                <h2>Hidden talent becomes visible, verified, developed, matched, and celebrated.</h2>
+                <p>The platform can become a national and international gateway for people who do not yet have access to networks, scholarships, investors, employers, research teams, or training programs.</p>
+              </article>
+            </div>
           </section>
 
           <section id="admin" class="page" data-page="admin">
@@ -581,6 +711,6 @@
     </div>
 
     <div id="toast" role="status" aria-live="polite"></div>
-    <script src="app.js?v=20260607-fetchfix"></script>
+    <script src="app.js?v=20260608-talent"></script>
   </body>
 </html>

@@ -68,6 +68,7 @@ const heroMetrics = [
 
 const pageTitles = {
   overview: "Choose your role",
+  talent: "Talent network",
   admin: "Admin access",
   employer: "I need workers",
   employee: "I need a job",

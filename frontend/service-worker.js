@@ -1,4 +1,4 @@
-const CACHE_NAME = "abinet-connect-v4-cssfix";
+const CACHE_NAME = "abinet-connect-v5-talent";
 const APP_SHELL = [
   "./",
   "index.html",
