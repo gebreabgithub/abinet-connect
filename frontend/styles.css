@@ -660,9 +660,12 @@ main {
   display: inline-grid;
   place-items: center;
   border-radius: 8px;
+  border: 0;
   padding: 0 14px;
   color: white;
   background: var(--brand);
+  cursor: pointer;
+  font: inherit;
   font-weight: 820;
   text-decoration: none;
 }
@@ -1683,16 +1686,22 @@ main {
   }
 
   .talent-hero {
-    gap: 18px;
-    padding: 22px;
+    gap: 12px;
+    padding: 16px;
   }
 
   .talent-hero h2 {
-    font-size: 1.7rem;
+    font-size: 1.32rem;
+    line-height: 1.08;
+  }
+
+  .talent-hero p:not(.eyebrow) {
+    display: none;
   }
 
   .talent-hero-actions {
     min-width: 0;
+    gap: 8px;
   }
 
   .talent-stage-flow article {

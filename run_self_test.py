@@ -8,7 +8,43 @@ import subprocess
 import time
 import sys
 import json
-import requests
+try:
+    import requests
+except ModuleNotFoundError:
+    import urllib.error
+    import urllib.request
+
+    class _Response:
+        def __init__(self, status_code, body):
+            self.status_code = status_code
+            self._body = body
+
+        def json(self):
+            if not self._body:
+                return {}
+            return json.loads(self._body)
+
+    class _RequestsFallback:
+        @staticmethod
+        def _request(method, url, json=None, headers=None, timeout=5):
+            payload = None if json is None else __import__("json").dumps(json).encode("utf-8")
+            request_headers = {"Content-Type": "application/json", **(headers or {})}
+            request = urllib.request.Request(url, data=payload, headers=request_headers, method=method)
+            try:
+                with urllib.request.urlopen(request, timeout=timeout) as response:
+                    return _Response(response.status, response.read().decode("utf-8"))
+            except urllib.error.HTTPError as error:
+                return _Response(error.code, error.read().decode("utf-8"))
+
+        @classmethod
+        def get(cls, url, headers=None, timeout=5):
+            return cls._request("GET", url, headers=headers, timeout=timeout)
+
+        @classmethod
+        def post(cls, url, json=None, headers=None, timeout=5):
+            return cls._request("POST", url, json=json, headers=headers, timeout=timeout)
+
+    requests = _RequestsFallback()
 from datetime import datetime
 
 # Colors

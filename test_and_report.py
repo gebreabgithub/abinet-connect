@@ -7,6 +7,7 @@ Executes all tests and shows detailed failure information
 import subprocess
 import sys
 import os
+import re
 
 # Colors
 GREEN = '\033[92m'
@@ -61,7 +62,8 @@ def main():
         
         # Parse results
         output = result.stdout
-        lines = output.split('\n')
+        plain_output = re.sub(r"\x1b\[[0-9;]*m", "", output)
+        lines = plain_output.split('\n')
         
         # Extract summary information
         print_header("PARSED RESULTS")
@@ -106,6 +108,10 @@ def main():
         # Print status
         print_header("FINAL STATUS")
         
+        if result.returncode != 0 and failed == 0:
+            print(f"{RED}{BOLD}✗ TEST RUN FAILED BEFORE SUMMARY{RESET}\n")
+            print(f"The self-test exited with code {result.returncode}. Review stderr above.\n")
+            return result.returncode
         if failed == 0:
             print(f"{GREEN}{BOLD}✓ ALL TESTS PASSED! 🎉{RESET}\n")
             print(f"Your Abinet Connect application is working correctly!\n")

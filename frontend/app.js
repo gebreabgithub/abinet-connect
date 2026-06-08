@@ -17,6 +17,9 @@ const state = {
   talents: [],
   talentOpportunities: [],
   talentMatches: [],
+  talentSupporters: [],
+  talentSupportOffers: [],
+  talentSupportMatches: [],
   successStories: [],
   stats: {},
   selectedRole: "employer",
@@ -40,10 +43,10 @@ const staffRoles = [
 ];
 
 const staffCapabilities = {
-  MasterAdmin: ["staff", "category", "verification", "applications", "support", "finance", "compliance", "audit", "settings"],
-  CountryAdmin: ["staff", "category", "verification", "applications", "support", "finance", "compliance", "audit"],
-  RegionalManager: ["verification", "applications", "support", "audit"],
-  VerificationOfficer: ["verification", "applications"],
+  MasterAdmin: ["staff", "category", "verification", "applications", "support", "finance", "compliance", "audit", "settings", "talent"],
+  CountryAdmin: ["staff", "category", "verification", "applications", "support", "finance", "compliance", "audit", "talent"],
+  RegionalManager: ["verification", "applications", "support", "audit", "talent"],
+  VerificationOfficer: ["verification", "applications", "talent"],
   SupportAgent: ["support", "applications"],
   FinanceOfficer: ["finance", "applications"],
   ComplianceOfficer: ["compliance", "audit"],
@@ -673,7 +676,7 @@ function renderApplicationQueue() {
 }
 
 function talentStatusClass(status) {
-  if (["Approved", "Published"].includes(status)) return "good";
+  if (["Approved", "Published", "Verified", "Active"].includes(status)) return "good";
   if (["Correction Required", "Pending Review"].includes(status)) return "warn";
   if (["Rejected", "Closed"].includes(status)) return "danger";
   return "";
@@ -683,12 +686,18 @@ function renderTalentNetwork() {
   const talentList = qs("#talentProfileList");
   const opportunityList = qs("#talentOpportunityList");
   const matchList = qs("#talentMatchList");
+  const supporterList = qs("#talentSupporterList");
+  const supportOfferList = qs("#talentSupportOfferList");
+  const supportMatchList = qs("#talentSupportMatchList");
   const storyList = qs("#successStoryList");
-  if (!talentList || !opportunityList || !matchList || !storyList) return;
+  if (!talentList || !opportunityList || !matchList || !supporterList || !supportOfferList || !supportMatchList || !storyList) return;
 
   const talents = state.talents || [];
   const opportunities = state.talentOpportunities || [];
   const matches = state.talentMatches || [];
+  const supporters = state.talentSupporters || [];
+  const supportOffers = state.talentSupportOffers || [];
+  const supportMatches = state.talentSupportMatches || [];
   const stories = state.successStories || [];
   const canReview = Boolean(state.adminToken && staffCapabilities[state.currentUser?.role]?.includes("talent"));
 
@@ -737,6 +746,53 @@ function renderTalentNetwork() {
       </footer>
     </article>
   `).join("") || `<div class="empty-state">Approve talent profiles and publish opportunities to generate matches.</div>`;
+
+  supporterList.innerHTML = supporters.map((supporter) => `
+    <article class="record">
+      <div>
+        <strong>${escapeHtml(supporter.name)}</strong>
+        <span>${escapeHtml(supporter.supporterType)} · ${escapeHtml(supporter.organization || "Independent")} · ${escapeHtml(supporter.country || "International")}</span>
+      </div>
+      <p>${escapeHtml(supporter.motivation || "Ready to help talented people.")}</p>
+      <footer>
+        <span class="badge ${talentStatusClass(supporter.status)}">${escapeHtml(supporter.status)}</span>
+        ${canReview ? `<div class="queue-actions">
+          <button class="small-button" data-supporter-verify="${escapeHtml(supporter.id)}" type="button">Verify</button>
+          <button class="small-button secondary-button" data-supporter-correction="${escapeHtml(supporter.id)}" type="button">Correction</button>
+        </div>` : `<span>${escapeHtml(supporter.contact || "Contact pending")}</span>`}
+      </footer>
+    </article>
+  `).join("") || `<div class="empty-state">No supporters registered yet.</div>`;
+
+  supportOfferList.innerHTML = supportOffers.map((offer) => `
+    <article class="record">
+      <div>
+        <strong>${escapeHtml(offer.supporterName)}</strong>
+        <span>${escapeHtml((offer.supportTypes || []).join(", ") || "Support")} · ${escapeHtml((offer.countries || []).join(", ") || "International")}</span>
+      </div>
+      <div class="chips">${(offer.categories || []).slice(0, 4).map((item) => `<span>${escapeHtml(item)}</span>`).join("")}</div>
+      <p>${escapeHtml(offer.details || "Support offer submitted.")}</p>
+      <footer>
+        <span class="badge ${talentStatusClass(offer.status)}">${escapeHtml(offer.status)}</span>
+        ${canReview ? `<div class="queue-actions">
+          <button class="small-button" data-support-offer-active="${escapeHtml(offer.id)}" type="button">Activate</button>
+          <button class="small-button secondary-button" data-support-offer-correction="${escapeHtml(offer.id)}" type="button">Correction</button>
+        </div>` : `<span>${escapeHtml(offer.capacity || "Capacity open")}</span>`}
+      </footer>
+    </article>
+  `).join("") || `<div class="empty-state">No support offers submitted yet.</div>`;
+
+  supportMatchList.innerHTML = supportMatches.map((match) => `
+    <article class="record">
+      <div>
+        <strong>${escapeHtml(match.supporterName)} → ${escapeHtml(match.talentName)}</strong>
+        <span>${escapeHtml((match.supportTypes || []).join(", ") || "Support")} · ${escapeHtml((match.reasons || []).join(", ") || "support fit")}</span>
+      </div>
+      <footer>
+        <span class="badge good">${escapeHtml(match.score)}% fit</span>
+      </footer>
+    </article>
+  `).join("") || `<div class="empty-state">Verify supporters and activate offers to generate support matches.</div>`;
 
   storyList.innerHTML = stories.map((story) => `
     <article class="record">
@@ -805,6 +861,70 @@ function renderTalentNetwork() {
           body: JSON.stringify({ status: "Correction Required" }),
         });
         toast("Opportunity correction requested.");
+        await loadAll();
+      } catch (error) {
+        toast(error.message, "error");
+      }
+    });
+  });
+
+  document.querySelectorAll("[data-supporter-verify]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      try {
+        await request(`/api/talent-supporters/${button.dataset.supporterVerify}/status`, {
+          method: "PATCH",
+          headers: { "X-Admin-Token": state.adminToken },
+          body: JSON.stringify({ status: "Verified" }),
+        });
+        toast("Supporter verified.");
+        await loadAll();
+      } catch (error) {
+        toast(error.message, "error");
+      }
+    });
+  });
+
+  document.querySelectorAll("[data-supporter-correction]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      try {
+        await request(`/api/talent-supporters/${button.dataset.supporterCorrection}/status`, {
+          method: "PATCH",
+          headers: { "X-Admin-Token": state.adminToken },
+          body: JSON.stringify({ status: "Correction Required" }),
+        });
+        toast("Supporter correction requested.");
+        await loadAll();
+      } catch (error) {
+        toast(error.message, "error");
+      }
+    });
+  });
+
+  document.querySelectorAll("[data-support-offer-active]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      try {
+        await request(`/api/talent-support-offers/${button.dataset.supportOfferActive}/status`, {
+          method: "PATCH",
+          headers: { "X-Admin-Token": state.adminToken },
+          body: JSON.stringify({ status: "Active" }),
+        });
+        toast("Support offer activated.");
+        await loadAll();
+      } catch (error) {
+        toast(error.message, "error");
+      }
+    });
+  });
+
+  document.querySelectorAll("[data-support-offer-correction]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      try {
+        await request(`/api/talent-support-offers/${button.dataset.supportOfferCorrection}/status`, {
+          method: "PATCH",
+          headers: { "X-Admin-Token": state.adminToken },
+          body: JSON.stringify({ status: "Correction Required" }),
+        });
+        toast("Support offer correction requested.");
         await loadAll();
       } catch (error) {
         toast(error.message, "error");
@@ -980,6 +1100,8 @@ function renderRoleDashboards() {
     dashboardCard("Verifications", pendingWorkers.length, "Workers waiting for staff verification."),
     dashboardCard("Fraud alerts", state.fraudAlerts.length, "Risk signals and suspicious account activity."),
     dashboardCard("Payments", state.payments.length, "Finance records and invoice activity.", adminRecordButton("View payments")),
+    dashboardCard("Talents", state.talents.length, "Talent profiles submitted to the opportunity network.", `<button class="small-button" type="button" data-open-page="talent">View talent</button>`),
+    dashboardCard("Supporters", state.talentSupporters.length, "Sponsors, mentors, donors, and partners helping talent.", `<button class="small-button" type="button" data-open-page="talent">View support</button>`),
     dashboardCard("Reports", safetyReports.length + complianceRequests.length, "Safety and compliance reports requiring review.", adminRecordButton("View reports")),
     dashboardCard("Audit logs", state.auditLog.length, "Recent staff and system actions."),
   ].join("");
@@ -988,12 +1110,6 @@ function renderRoleDashboards() {
     button.addEventListener("click", () => {
       window.location.hash = button.dataset.openPage;
       showPage();
-    });
-  });
-
-  document.querySelectorAll("[data-scroll-target]").forEach((button) => {
-    button.addEventListener("click", () => {
-      qs(`#${button.dataset.scrollTarget}`)?.scrollIntoView({ block: "start", behavior: "smooth" });
     });
   });
 
@@ -1317,6 +1433,15 @@ async function loadAll() {
 }
 
 function wireForms() {
+  document.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-scroll-target]");
+    if (!button) return;
+    const target = qs(`#${button.dataset.scrollTarget}`);
+    if (!target) return;
+    const top = target.getBoundingClientRect().top + window.scrollY - 20;
+    window.scrollTo({ top, behavior: "smooth" });
+  });
+
   qs("#publicRegister").addEventListener("click", () => {
     openRegistration("Worker");
   });
@@ -1650,6 +1775,56 @@ function wireForms() {
       });
       formElement.reset();
       toast("Opportunity submitted for review.");
+      await loadAll();
+    } catch (error) {
+      toast(error.message, "error");
+    }
+  });
+
+  qs("#talentSupporterForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
+    try {
+      await request("/api/talent-supporters", {
+        method: "POST",
+        body: JSON.stringify({
+          name: form.get("name"),
+          contact: form.get("contact"),
+          supporterType: form.get("supporterType"),
+          organization: form.get("organization"),
+          country: form.get("country"),
+          motivation: form.get("motivation"),
+        }),
+      });
+      formElement.reset();
+      toast("Supporter profile submitted for verification.");
+      await loadAll();
+    } catch (error) {
+      toast(error.message, "error");
+    }
+  });
+
+  qs("#talentSupportOfferForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
+    try {
+      await request("/api/talent-support-offers", {
+        method: "POST",
+        body: JSON.stringify({
+          supporterName: form.get("supporterName"),
+          supportTypes: splitList(form.get("supportTypes") || ""),
+          categories: splitList(form.get("categories") || ""),
+          countries: splitList(form.get("countries") || ""),
+          skills: splitList(form.get("skills") || ""),
+          budget: form.get("budget"),
+          capacity: form.get("capacity"),
+          details: form.get("details"),
+        }),
+      });
+      formElement.reset();
+      toast("Support offer submitted for review.");
       await loadAll();
     } catch (error) {
       toast(error.message, "error");

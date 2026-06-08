@@ -8,7 +8,7 @@
     <title>Abinet Connect</title>
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="styles.css?v=20260608-talent-functional" />
+    <link rel="stylesheet" href="styles.css?v=20260608-supporter-flow2" />
   </head>
   <body>
     <div class="app-shell">
@@ -120,17 +120,10 @@
                 <p>The network expands Abinet Connect beyond employment into scholarships, research, startups, competitions, mentorship, training, and national or international opportunity matching.</p>
               </div>
               <div class="talent-hero-actions">
-                <a class="button-link" href="#employee">Register Talent</a>
-                <a class="button-link secondary-link" href="#employer">Post Opportunity</a>
+                <button class="button-link" type="button" data-scroll-target="talentProfileForm">Register Talent</button>
+                <button class="button-link secondary-link" type="button" data-scroll-target="talentOpportunityForm">Post Opportunity</button>
+                <button class="button-link secondary-link" type="button" data-scroll-target="talentSupporterForm">Help Talent</button>
               </div>
-            </div>
-
-            <div class="talent-stage-flow" aria-label="Talent network architecture stages">
-              <article><span>01</span><strong>Discover Talent</strong><small>Public registration, referrals, and success-story discovery.</small></article>
-              <article><span>02</span><strong>Verify Talent</strong><small>Identity, education, skill, and achievement evidence review.</small></article>
-              <article><span>03</span><strong>Develop Talent</strong><small>Assessment, gap detection, mentoring, training, and portfolio improvement.</small></article>
-              <article><span>04</span><strong>Match Opportunity</strong><small>Category, skills, education, achievement, and readiness ranking.</small></article>
-              <article><span>05</span><strong>Track Success</strong><small>Confirmed outcomes become public stories and partner proof.</small></article>
             </div>
 
             <div class="talent-action-grid">
@@ -184,6 +177,48 @@
                 <label>Eligibility<textarea name="eligibility" rows="3" placeholder="Who can apply and what evidence is required"></textarea></label>
                 <button type="submit">Submit opportunity</button>
               </form>
+
+              <form id="talentSupporterForm" class="panel form-panel">
+                <p class="eyebrow">Supporter intake</p>
+                <h2>Register to help talent</h2>
+                <label>Name<input name="name" required placeholder="Person, foundation, company, mentor" /></label>
+                <label>Contact<input name="contact" required placeholder="Phone or email" /></label>
+                <label>Supporter type
+                  <select name="supporterType" required>
+                    <option>Sponsor</option>
+                    <option>Mentor</option>
+                    <option>Opportunity Partner</option>
+                    <option>Verifier</option>
+                    <option>Donor</option>
+                  </select>
+                </label>
+                <label>Organization<input name="organization" placeholder="Company, NGO, university, private person" /></label>
+                <label>Country<input name="country" placeholder="Ethiopia, USA, UAE, International" /></label>
+                <label>Why you want to help<textarea name="motivation" rows="3" placeholder="Scholarship support, mentorship, equipment, introductions, verification help"></textarea></label>
+                <button type="submit">Submit supporter</button>
+              </form>
+
+              <form id="talentSupportOfferForm" class="panel form-panel">
+                <p class="eyebrow">Support offer</p>
+                <h2>Offer help</h2>
+                <label>Supporter name<input name="supporterName" required placeholder="Must match the supporter profile name" /></label>
+                <label>Support types<input name="supportTypes" required placeholder="Sponsor, Mentor, Donor" /></label>
+                <label>Talent categories<input name="categories" placeholder="High-Tech Talent, Researchers, Entrepreneurs" /></label>
+                <label>Countries covered<input name="countries" placeholder="Ethiopia, Kenya, International, Remote" /></label>
+                <label>Skills or focus areas<input name="skills" placeholder="AI, robotics, research, leadership, startup" /></label>
+                <label>Budget or resource<input name="budget" placeholder="Monthly support, laptop, grant, training seat" /></label>
+                <label>Capacity<input name="capacity" placeholder="Example: 5 talents per quarter" /></label>
+                <label>Support details<textarea name="details" rows="3" required placeholder="What help is available and any conditions"></textarea></label>
+                <button type="submit">Submit support offer</button>
+              </form>
+            </div>
+
+            <div class="talent-stage-flow" aria-label="Talent network architecture stages">
+              <article><span>01</span><strong>Discover Talent</strong><small>Public registration, referrals, supporter intake, and success-story discovery.</small></article>
+              <article><span>02</span><strong>Verify Talent</strong><small>Identity, education, skill, achievement, provider, and supporter review.</small></article>
+              <article><span>03</span><strong>Develop Talent</strong><small>Assessment, gap detection, mentoring, training, and portfolio improvement.</small></article>
+              <article><span>04</span><strong>Match Opportunity</strong><small>Category, skills, education, support fit, achievement, and readiness ranking.</small></article>
+              <article><span>05</span><strong>Track Success</strong><small>Confirmed outcomes become public stories and partner proof.</small></article>
             </div>
 
             <div class="talent-live-grid">
@@ -217,6 +252,33 @@
               <section class="panel">
                 <div class="panel-header">
                   <div>
+                    <p class="eyebrow">Supporter registry</p>
+                    <h2>People helping talent</h2>
+                  </div>
+                </div>
+                <div id="talentSupporterList" class="stack-list"></div>
+              </section>
+              <section class="panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Support offers</p>
+                    <h2>Available help</h2>
+                  </div>
+                </div>
+                <div id="talentSupportOfferList" class="stack-list"></div>
+              </section>
+              <section class="panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Support matching</p>
+                    <h2>Talent support matches</h2>
+                  </div>
+                </div>
+                <div id="talentSupportMatchList" class="stack-list"></div>
+              </section>
+              <section class="panel">
+                <div class="panel-header">
+                  <div>
                     <p class="eyebrow">Success tracking</p>
                     <h2>Published stories</h2>
                   </div>
@@ -230,8 +292,8 @@
                 <p class="eyebrow">Main users</p>
                 <h2>Who enters the network</h2>
                 <div class="mini-flow">
-                  <span>Public Visitor</span><b>Register as Talent</b><b>Register as Provider</b><b>Explore Success Stories</b>
-                  <span>Talent Profile</span><span>Provider Profile</span>
+                  <span>Public Visitor</span><b>Register as Talent</b><b>Register as Provider</b><b>Register as Supporter</b>
+                  <span>Talent Profile</span><span>Provider Profile</span><span>Supporter Profile</span>
                 </div>
               </article>
 
@@ -266,6 +328,19 @@
                   <li>Post opportunity</li>
                   <li>Admin opportunity review</li>
                   <li>Publish or request correction</li>
+                </ol>
+              </article>
+
+              <article class="talent-panel">
+                <p class="eyebrow">Supporter flow</p>
+                <h2>How helpers are managed</h2>
+                <ol class="flow-list">
+                  <li>Supporter registers profile</li>
+                  <li>Staff verifies identity or organization</li>
+                  <li>Supporter submits help offer</li>
+                  <li>Admin activates safe support</li>
+                  <li>System matches verified talent</li>
+                  <li>Outcome can become a success story</li>
                 </ol>
               </article>
 
@@ -317,7 +392,7 @@
                 <h2>Control center responsibilities</h2>
                 <div class="pill-list compact">
                   <span>Review Profiles</span><span>Review Providers</span><span>Approve Opportunities</span>
-                  <span>Monitor Applications</span><span>Manage Categories</span><span>Track Stories</span>
+                  <span>Verify Supporters</span><span>Monitor Applications</span><span>Manage Categories</span><span>Track Stories</span>
                 </div>
               </article>
 
@@ -803,6 +878,6 @@
     </div>
 
     <div id="toast" role="status" aria-live="polite"></div>
-    <script src="app.js?v=20260608-talent-functional"></script>
+    <script src="app.js?v=20260608-supporter-flow2"></script>
   </body>
 </html>

@@ -902,5 +902,7 @@
   "payments": [],
   "talents": [],
   "talentOpportunities": [],
+  "talentSupporters": [],
+  "talentSupportOffers": [],
   "successStories": []
 }

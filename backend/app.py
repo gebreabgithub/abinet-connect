@@ -147,6 +147,9 @@ def public_bootstrap(data):
         "talents": data.get("talents", []),
         "talentOpportunities": data.get("talentOpportunities", []),
         "talentMatches": build_talent_matches(data),
+        "talentSupporters": data.get("talentSupporters", []),
+        "talentSupportOffers": data.get("talentSupportOffers", []),
+        "talentSupportMatches": build_talent_support_matches(data),
         "successStories": data.get("successStories", []),
         "fraudAlerts": data.get("fraudAlerts", []),
         "auditLog": data.get("auditLog", [])[-12:],
@@ -188,6 +191,8 @@ def build_stats(data):
         "complianceRequests": len(data.get("complianceRequests", [])),
         "talents": len(data.get("talents", [])),
         "talentOpportunities": len(data.get("talentOpportunities", [])),
+        "talentSupporters": len(data.get("talentSupporters", [])),
+        "talentSupportOffers": len(data.get("talentSupportOffers", [])),
         "successStories": len(data.get("successStories", [])),
     }
 
@@ -223,6 +228,58 @@ def build_talent_matches(data):
                     "opportunityId": opportunity.get("id"),
                     "opportunityTitle": opportunity.get("title"),
                     "provider": opportunity.get("provider"),
+                    "score": min(score, 100),
+                    "reasons": reasons,
+                })
+    return sorted(matches, key=lambda item: item["score"], reverse=True)[:30]
+
+
+def build_talent_support_matches(data):
+    talents = [item for item in data.get("talents", []) if item.get("status") == "Approved"]
+    offers = [item for item in data.get("talentSupportOffers", []) if item.get("status") == "Active"]
+    verified_supporters = {
+        item.get("name", "").lower()
+        for item in data.get("talentSupporters", [])
+        if item.get("status") == "Verified"
+    }
+    matches = []
+    for talent in talents:
+        talent_skills = {item.lower() for item in talent.get("skills", [])}
+        talent_country = str(talent.get("country", "")).lower()
+        talent_category = str(talent.get("category", "")).lower()
+        for offer in offers:
+            supporter_name = str(offer.get("supporterName", "")).strip()
+            if supporter_name and supporter_name.lower() not in verified_supporters:
+                continue
+            score = 0
+            reasons = []
+            categories = {item.lower() for item in offer.get("categories", [])}
+            countries = {item.lower() for item in offer.get("countries", [])}
+            skills = {item.lower() for item in offer.get("skills", [])}
+            if not categories or talent_category in categories:
+                score += 35
+                reasons.append("category fit")
+            if not countries or "international" in countries or "remote" in countries or talent_country in countries:
+                score += 25
+                reasons.append("country fit")
+            overlap = sorted(talent_skills & skills)
+            if overlap:
+                score += min(25, len(overlap) * 10)
+                reasons.append("skill focus")
+            if offer.get("supportTypes"):
+                score += 10
+                reasons.append("support available")
+            if talent.get("verificationLevel") in {"Skill Verified", "Achievement Verified", "Elite Talent"}:
+                score += 5
+                reasons.append("verified profile")
+            if score >= 40:
+                matches.append({
+                    "id": f"support-match-{talent.get('id')}-{offer.get('id')}",
+                    "talentId": talent.get("id"),
+                    "talentName": talent.get("name"),
+                    "supportOfferId": offer.get("id"),
+                    "supporterName": supporter_name or "Verified supporter",
+                    "supportTypes": offer.get("supportTypes", []),
                     "score": min(score, 100),
                     "reasons": reasons,
                 })
@@ -346,6 +403,12 @@ class BrokerHandler(BaseHTTPRequestHandler):
                 return self.json(store.read().get("talentOpportunities", []))
             if route == "/api/talent-matches":
                 return self.json(build_talent_matches(store.read()))
+            if route == "/api/talent-supporters":
+                return self.json(store.read().get("talentSupporters", []))
+            if route == "/api/talent-support-offers":
+                return self.json(store.read().get("talentSupportOffers", []))
+            if route == "/api/talent-support-matches":
+                return self.json(build_talent_support_matches(store.read()))
             if route == "/api/success-stories":
                 return self.json(store.read().get("successStories", []))
             if route == "/api/admin/verification-queue":
@@ -395,6 +458,10 @@ class BrokerHandler(BaseHTTPRequestHandler):
                 return self.json(self.create_talent(body), 201)
             if route == "/api/talent-opportunities":
                 return self.json(self.create_talent_opportunity(body), 201)
+            if route == "/api/talent-supporters":
+                return self.json(self.create_talent_supporter(body), 201)
+            if route == "/api/talent-support-offers":
+                return self.json(self.create_talent_support_offer(body), 201)
             if route == "/api/success-stories":
                 self.require_staff_capability("talent")
                 return self.json(self.create_success_story(body), 201)
@@ -429,6 +496,12 @@ class BrokerHandler(BaseHTTPRequestHandler):
             if len(parts) == 4 and parts[:2] == ["api", "talent-opportunities"] and parts[3] == "status":
                 self.require_staff_capability("talent")
                 return self.json(self.update_talent_opportunity_status(parts[2], body))
+            if len(parts) == 4 and parts[:2] == ["api", "talent-supporters"] and parts[3] == "status":
+                self.require_staff_capability("talent")
+                return self.json(self.update_talent_supporter_status(parts[2], body))
+            if len(parts) == 4 and parts[:2] == ["api", "talent-support-offers"] and parts[3] == "status":
+                self.require_staff_capability("talent")
+                return self.json(self.update_talent_support_offer_status(parts[2], body))
             return self.json({"error": "Route not found"}, 404)
         except ApiError as error:
             return self.json({"error": error.message, **error.details}, error.status)
@@ -1066,6 +1139,71 @@ class BrokerHandler(BaseHTTPRequestHandler):
 
         return store.update(mutate)
 
+    def create_talent_supporter(self, body):
+        name = str(body.get("name", "")).strip()
+        contact = str(body.get("contact", "")).strip()
+        supporter_type = str(body.get("supporterType", "")).strip()
+        organization = str(body.get("organization", "")).strip()
+        country = str(body.get("country", "International")).strip() or "International"
+        motivation = str(body.get("motivation", "")).strip()
+        if not name or not contact or not supporter_type:
+            raise ApiError("Name, contact, and supporter type are required", 400)
+        if supporter_type not in {"Sponsor", "Mentor", "Opportunity Partner", "Verifier", "Donor"}:
+            raise ApiError("Invalid supporter type", 400)
+
+        def mutate(data):
+            item = {
+                "id": make_id("supporter"),
+                "name": name,
+                "contact": contact,
+                "supporterType": supporter_type,
+                "organization": organization,
+                "country": country,
+                "motivation": motivation,
+                "status": "Pending Review",
+                "createdAt": now_ms(),
+            }
+            data.setdefault("talentSupporters", []).insert(0, item)
+            audit(data, "Talent Network", "submitted supporter", name)
+            return item
+
+        return store.update(mutate)
+
+    def create_talent_support_offer(self, body):
+        supporter_name = str(body.get("supporterName", "")).strip()
+        support_types = parse_list(body.get("supportTypes"))
+        categories = parse_list(body.get("categories"))
+        countries = parse_list(body.get("countries"))
+        skills = parse_list(body.get("skills"))
+        budget = str(body.get("budget", "")).strip()
+        capacity = str(body.get("capacity", "")).strip()
+        details = str(body.get("details", "")).strip()
+        if not supporter_name or not support_types or not details:
+            raise ApiError("Supporter name, support type, and support details are required", 400)
+        invalid_types = [item for item in support_types if item not in {"Sponsor", "Mentor", "Opportunity Partner", "Verifier", "Donor"}]
+        if invalid_types:
+            raise ApiError("Invalid support type", 400, {"invalidTypes": invalid_types})
+
+        def mutate(data):
+            item = {
+                "id": make_id("support"),
+                "supporterName": supporter_name,
+                "supportTypes": support_types,
+                "categories": categories,
+                "countries": countries,
+                "skills": skills,
+                "budget": budget,
+                "capacity": capacity,
+                "details": details,
+                "status": "Pending Review",
+                "createdAt": now_ms(),
+            }
+            data.setdefault("talentSupportOffers", []).insert(0, item)
+            audit(data, "Talent Network", "submitted support offer", supporter_name)
+            return item
+
+        return store.update(mutate)
+
     def create_success_story(self, body):
         talent_name = str(body.get("talentName", "")).strip()
         outcome = str(body.get("outcome", "")).strip()
@@ -1122,6 +1260,36 @@ class BrokerHandler(BaseHTTPRequestHandler):
                     audit(data, "Talent Admin", "updated opportunity", item.get("title", opportunity_id))
                     return copy.deepcopy(item)
             raise ApiError("Opportunity not found", 404)
+
+        return store.update(mutate)
+
+    def update_talent_supporter_status(self, supporter_id, body):
+        status = str(body.get("status", "Verified")).strip()
+        if status not in {"Pending Review", "Verified", "Correction Required", "Rejected"}:
+            raise ApiError("Invalid supporter status", 400)
+
+        def mutate(data):
+            for item in data.get("talentSupporters", []):
+                if item.get("id") == supporter_id:
+                    item["status"] = status
+                    audit(data, "Talent Admin", "updated supporter", item.get("name", supporter_id))
+                    return copy.deepcopy(item)
+            raise ApiError("Supporter not found", 404)
+
+        return store.update(mutate)
+
+    def update_talent_support_offer_status(self, offer_id, body):
+        status = str(body.get("status", "Active")).strip()
+        if status not in {"Pending Review", "Active", "Correction Required", "Closed", "Rejected"}:
+            raise ApiError("Invalid support offer status", 400)
+
+        def mutate(data):
+            for item in data.get("talentSupportOffers", []):
+                if item.get("id") == offer_id:
+                    item["status"] = status
+                    audit(data, "Talent Admin", "updated support offer", item.get("supporterName", offer_id))
+                    return copy.deepcopy(item)
+            raise ApiError("Support offer not found", 404)
 
         return store.update(mutate)
 
